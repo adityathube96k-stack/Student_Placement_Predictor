@@ -1,0 +1,198 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+
+    background: #f5f7fb;
+
+    color: #172033;
+}
+
+
+/* Navbar */
+
+.navbar {
+    height: 70px;
+
+    padding: 0 7%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    background: white;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+
+.logo {
+    font-size: 20px;
+
+    font-weight: 700;
+}
+
+
+.navbar a {
+    text-decoration: none;
+
+    color: #2563eb;
+
+    font-weight: 600;
+}
+
+
+/* Hero */
+
+.hero {
+    width: 86%;
+
+    max-width: 1200px;
+
+    margin: 70px auto;
+}
+
+
+.badge {
+    display: inline-block;
+
+    margin-bottom: 18px;
+
+    padding: 8px 12px;
+
+    border-radius: 20px;
+
+    background: #e8eefc;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+h1 {
+    font-size: 52px;
+
+    margin-bottom: 18px;
+}
+
+
+.subtitle {
+    max-width: 760px;
+
+    font-size: 18px;
+
+    line-height: 1.7;
+
+    color: #596579;
+}
+
+
+/* Buttons */
+
+.buttons {
+    display: flex;
+
+    gap: 14px;
+
+    margin-top: 28px;
+}
+
+
+.btn {
+    display: inline-block;
+
+    padding: 13px 20px;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    font-weight: 700;
+}
+
+
+.primary {
+    background: #2563eb;
+
+    color: white;
+}
+
+
+.secondary {
+    background: white;
+
+    color: #2563eb;
+
+    border: 1px solid #2563eb;
+}
+
+
+/* Cards */
+
+.cards {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 20px;
+
+    margin-top: 65px;
+}
+
+
+.card {
+    background: white;
+
+    padding: 25px;
+
+    border-radius: 12px;
+
+    border: 1px solid #e5e7eb;
+}
+
+
+.card h3 {
+    margin-bottom: 10px;
+}
+
+
+.card p {
+    color: #657084;
+
+    line-height: 1.6;
+}
+
+
+/* Footer */
+
+footer {
+    text-align: center;
+
+    padding: 30px;
+
+    color: #657084;
+}
+
+
+/* Responsive */
+
+@media (max-width: 800px) {
+
+    h1 {
+        font-size: 38px;
+    }
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+}
