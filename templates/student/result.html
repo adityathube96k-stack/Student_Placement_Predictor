@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Placement Prediction Result</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/prediction.css') }}">
+
+</head>
+
+
+<body>
+
+<div class="prediction-container">
+
+    <div class="prediction-card">
+
+        <!-- HEADER -->
+
+        <div class="prediction-header">
+
+            <h1>Placement Prediction Result</h1>
+
+            <p>
+                Your AI-based placement prediction has been generated.
+            </p>
+
+        </div>
+
+
+        <!-- RESULT -->
+
+        {% if result %}
+
+            <div class="result-box">
+
+                {% if result.prediction == 1 %}
+
+                    <div class="result-status placed">
+                        PLACEMENT PREDICTED
+                    </div>
+
+                {% else %}
+
+                    <div class="result-status not-placed">
+                        PLACEMENT NOT PREDICTED
+                    </div>
+
+                {% endif %}
+
+
+                <!-- Probability -->
+
+                <div class="probability-section">
+
+                    <h2>
+                        {{ result.placement_probability }}%
+                    </h2>
+
+                    <p>
+                        Placement Probability
+                    </p>
+
+                </div>
+
+
+                <!-- Other Probability -->
+
+                <div class="secondary-probability">
+
+                    <p>
+                        Not Placed Probability:
+                        <strong>
+                            {{ result.not_placed_probability }}%
+                        </strong>
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- INPUT SUMMARY -->
+
+            <div class="input-summary">
+
+                <h2>Your Input Details</h2>
+
+                <div class="summary-grid">
+
+                    <div class="summary-item">
+                        <span>CGPA</span>
+                        <strong>{{ inputs.cgpa }}</strong>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Attendance</span>
+                        <strong>{{ inputs.attendance }}%</strong>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Aptitude</span>
+                        <strong>{{ inputs.aptitude_score }}</strong>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Coding</span>
+                        <strong>{{ inputs.coding_score }}</strong>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Communication</span>
+                        <strong>{{ inputs.communication_score }}</strong>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Technical</span>
+                        <strong>{{ inputs.technical_score }}</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTION BUTTONS -->
+
+            <div class="result-actions">
+
+                <a
+                    href="{{ url_for('prediction.prediction') }}"
+                    class="prediction-button">
+
+                    Predict Again
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('dashboard.dashboard') }}"
+                    class="dashboard-button">
+
+                    Back to Dashboard
+
+                </a>
+
+            </div>
+
+        {% else %}
+
+            <div class="alert danger">
+
+                Unable to generate prediction result.
+
+            </div>
+
+            <div class="back-link">
+
+                <a href="{{ url_for('prediction.prediction') }}">
+                    ← Try Again
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

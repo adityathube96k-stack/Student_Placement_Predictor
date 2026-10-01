@@ -10,6 +10,7 @@ from database.db import test_connection
 
 from routes.auth_routes import auth_bp
 from routes.dashboard_routes import dashboard_bp
+from routes.prediction_routes import prediction_bp
 
 
 app = Flask(__name__)
@@ -29,6 +30,10 @@ app.register_blueprint(
 
 app.register_blueprint(
     dashboard_bp
+)
+
+app.register_blueprint(
+    prediction_bp
 )
 
 
