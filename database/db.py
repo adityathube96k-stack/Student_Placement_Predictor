@@ -15,16 +15,26 @@ def get_connection():
 
 
 def test_connection():
+
+    connection = None
+
     try:
+
         connection = get_connection()
 
         with connection.cursor() as cursor:
-            cursor.execute("SELECT 1 AS test")
-            cursor.fetchone()
 
-        connection.close()
+            cursor.execute("SELECT 1 AS test")
+
+            result = cursor.fetchone()
 
         return True, "MySQL connection successful."
 
     except Exception as error:
+
         return False, str(error)
+
+    finally:
+
+        if connection:
+            connection.close()

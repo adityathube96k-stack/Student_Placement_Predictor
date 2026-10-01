@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard | Placement Predictor</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+</head>
+
+<body>
+
+
+    <!-- ==================================================
+         NAVBAR
+    =================================================== -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            Student Placement Predictor
+        </div>
+
+
+        <div class="nav-links">
+
+            <a href="{{ url_for('dashboard.dashboard') }}">
+                Dashboard
+            </a>
+
+            <a href="{{ url_for('dashboard.profile') }}">
+                My Profile
+            </a>
+
+            <a href="{{ url_for('auth.logout') }}">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- ==================================================
+         MAIN CONTAINER
+    =================================================== -->
+
+    <main class="container">
+
+
+        <!-- ==================================================
+             WELCOME SECTION
+        =================================================== -->
+
+        <section class="welcome-card">
+
+            <h1>
+                Welcome, {{ student.full_name }} 👋
+            </h1>
+
+            <p>
+                Welcome to your Student Placement Intelligence
+                Dashboard.
+            </p>
+
+            <p>
+                Manage your profile, academic information and
+                placement preparation from one place.
+            </p>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             PROFILE SUMMARY
+        =================================================== -->
+
+        <section class="section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        Student Profile
+                    </h2>
+
+                    <p class="section-description">
+                        Your basic student information.
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="{{ url_for('dashboard.profile') }}"
+                    class="btn"
+                >
+                    Edit Profile
+                </a>
+
+            </div>
+
+
+
+            <div class="profile-grid">
+
+
+                <!-- Full Name -->
+
+                <div class="info-card">
+
+                    <h3>
+                        Full Name
+                    </h3>
+
+                    <p>
+                        {{ student.full_name }}
+                    </p>
+
+                </div>
+
+
+
+                <!-- Email -->
+
+                <div class="info-card">
+
+                    <h3>
+                        Email
+                    </h3>
+
+                    <p>
+                        {{ student.email }}
+                    </p>
+
+                </div>
+
+
+
+                <!-- Enrollment -->
+
+                <div class="info-card">
+
+                    <h3>
+                        Enrollment Number
+                    </h3>
+
+                    <p>
+                        {{ student.enrollment_no or "Not Added" }}
+                    </p>
+
+                </div>
+
+
+
+                <!-- Phone -->
+
+                <div class="info-card">
+
+                    <h3>
+                        Phone
+                    </h3>
+
+                    <p>
+                        {{ student.phone or "Not Added" }}
+                    </p>
+
+                </div>
+
+
+
+                <!-- Branch -->
+
+                <div class="info-card">
+
+                    <h3>
+                        Branch
+                    </h3>
+
+                    <p>
+                        {{ student.branch or "Not Added" }}
+                    </p>
+
+                </div>
+
+
+
+                <!-- Year -->
+
+                <div class="info-card">
+
+                    <h3>
+                        Academic Year
+                    </h3>
+
+                    <p>
+
+                        {% if student.year %}
+
+                            Year {{ student.year }}
+
+                        {% else %}
+
+                            Not Added
+
+                        {% endif %}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             ACADEMIC INFORMATION
+        =================================================== -->
+
+        <section class="section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        Academic & Skill Scores
+                    </h2>
+
+                    <p class="section-description">
+                        Information used by the placement prediction
+                        system.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="score-grid">
+
+
+                <!-- CGPA -->
+
+                <div class="score-card">
+
+                    <span>
+                        CGPA
+                    </span>
+
+                    <strong>
+
+                        {% if student.cgpa is not none %}
+
+                            {{ student.cgpa }}
+
+                        {% else %}
+
+                            N/A
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+
+                <!-- Attendance -->
+
+                <div class="score-card">
+
+                    <span>
+                        Attendance
+                    </span>
+
+                    <strong>
+
+                        {% if student.attendance is not none %}
+
+                            {{ student.attendance }}%
+
+                        {% else %}
+
+                            N/A
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+
+                <!-- Aptitude -->
+
+                <div class="score-card">
+
+                    <span>
+                        Aptitude
+                    </span>
+
+                    <strong>
+
+                        {% if student.aptitude_score is not none %}
+
+                            {{ student.aptitude_score }}
+
+                        {% else %}
+
+                            N/A
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+
+                <!-- Coding -->
+
+                <div class="score-card">
+
+                    <span>
+                        Coding
+                    </span>
+
+                    <strong>
+
+                        {% if student.coding_score is not none %}
+
+                            {{ student.coding_score }}
+
+                        {% else %}
+
+                            N/A
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+
+                <!-- Communication -->
+
+                <div class="score-card">
+
+                    <span>
+                        Communication
+                    </span>
+
+                    <strong>
+
+                        {% if student.communication_score is not none %}
+
+                            {{ student.communication_score }}
+
+                        {% else %}
+
+                            N/A
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+
+                <!-- Technical -->
+
+                <div class="score-card">
+
+                    <span>
+                        Technical
+                    </span>
+
+                    <strong>
+
+                        {% if student.technical_score is not none %}
+
+                            {{ student.technical_score }}
+
+                        {% else %}
+
+                            N/A
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             PLACEMENT INTELLIGENCE
+        =================================================== -->
+
+        <section class="section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        Placement Intelligence
+                    </h2>
+
+                    <p class="section-description">
+                        AI-powered features that will be added
+                        throughout the project.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="feature-grid">
+
+
+                <!-- Prediction -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        🤖
+                    </div>
+
+                    <h3>
+                        Placement Prediction
+                    </h3>
+
+                    <p>
+                        Predict your placement status and
+                        placement probability using machine
+                        learning.
+                    </p>
+
+                    <button
+                        type="button"
+                        disabled
+                    >
+                        Coming Soon
+                    </button>
+
+                </div>
+
+
+
+                <!-- Readiness -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        📊
+                    </div>
+
+                    <h3>
+                        Placement Readiness
+                    </h3>
+
+                    <p>
+                        Calculate your overall placement
+                        preparation score.
+                    </p>
+
+                    <button
+                        type="button"
+                        disabled
+                    >
+                        Coming Soon
+                    </button>
+
+                </div>
+
+
+
+                <!-- Skill Gap -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        🎯
+                    </div>
+
+                    <h3>
+                        Skill Gap Analysis
+                    </h3>
+
+                    <p>
+                        Find the skills you need to improve
+                        for better placement opportunities.
+                    </p>
+
+                    <button
+                        type="button"
+                        disabled
+                    >
+                        Coming Soon
+                    </button>
+
+                </div>
+
+
+
+                <!-- Resume -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        📄
+                    </div>
+
+                    <h3>
+                        Resume Analyzer
+                    </h3>
+
+                    <p>
+                        Upload your resume and receive an
+                        AI-based resume score.
+                    </p>
+
+                    <button
+                        type="button"
+                        disabled
+                    >
+                        Coming Soon
+                    </button>
+
+                </div>
+
+
+
+                <!-- Company -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        🏢
+                    </div>
+
+                    <h3>
+                        Company Eligibility
+                    </h3>
+
+                    <p>
+                        Check which companies you may be
+                        eligible for based on your profile.
+                    </p>
+
+                    <button
+                        type="button"
+                        disabled
+                    >
+                        Coming Soon
+                    </button>
+
+                </div>
+
+
+
+                <!-- Interview -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        🎤
+                    </div>
+
+                    <h3>
+                        Mock Interview
+                    </h3>
+
+                    <p>
+                        Practice interview questions and
+                        receive performance feedback.
+                    </p>
+
+                    <button
+                        type="button"
+                        disabled
+                    >
+                        Coming Soon
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             PROFILE ACTION
+        =================================================== -->
+
+        <section class="profile-action">
+
+            <h2>
+                Keep Your Profile Updated
+            </h2>
+
+            <p>
+                Your academic and skill information will be used
+                by the AI/ML placement prediction system.
+            </p>
+
+            <a
+                href="{{ url_for('dashboard.profile') }}"
+                class="btn primary"
+            >
+                Update My Profile
+            </a>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- ==================================================
+         FOOTER
+    =================================================== -->
+
+    <footer class="footer">
+
+        <p>
+            © 2026 Student Placement Predictor
+        </p>
+
+        <p>
+            AI-Powered Career & Placement Intelligence System
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

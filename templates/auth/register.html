@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Register | Student Placement Predictor
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/auth.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="auth-page">
+
+
+    <div class="auth-card">
+
+
+        <div class="auth-logo">
+
+            <div class="logo-icon">
+                SP
+            </div>
+
+            <h1>
+                Student Placement Predictor
+            </h1>
+
+        </div>
+
+
+        <div class="auth-heading">
+
+            <h2>
+                Create Account
+            </h2>
+
+            <p>
+                Start your placement preparation journey.
+            </p>
+
+        </div>
+
+
+        {% with messages =
+            get_flashed_messages(
+                with_categories=true
+            )
+        %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div
+                        class="alert alert-{{ category }}"
+                    >
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <form
+            method="POST"
+            action="{{ url_for('auth.register') }}"
+        >
+
+
+            <div class="form-group">
+
+                <label>
+                    Full Name
+                </label>
+
+                <input
+                    type="text"
+                    name="full_name"
+                    placeholder="Enter your full name"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Email Address
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Minimum 6 characters"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Confirm Password
+                </label>
+
+                <input
+                    type="password"
+                    name="confirm_password"
+                    placeholder="Confirm your password"
+                    required
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="auth-button"
+            >
+                Create Account
+            </button>
+
+
+        </form>
+
+
+        <div class="auth-footer">
+
+            Already have an account?
+
+            <a
+                href="{{ url_for('auth.login') }}"
+            >
+                Login
+            </a>
+
+        </div>
+
+
+        <div class="back-home">
+
+            <a href="/">
+                ← Back to Home
+            </a>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>
