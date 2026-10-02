@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Skill Gap Analysis</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/prediction.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/skill_gap.css') }}">
+
+</head>
+
+
+<body>
+
+<div class="skill-gap-container">
+
+    <div class="skill-gap-card">
+
+        <!-- =================================================
+             HEADER
+        ================================================== -->
+
+        <div class="skill-gap-header">
+
+            <h1>Skill Gap Analysis</h1>
+
+            <p>
+                Identify the skills you need to improve
+                for better placement preparation.
+            </p>
+
+        </div>
+
+
+        <!-- =================================================
+             FLASH MESSAGES
+        ================================================== -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div class="alert {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        {% if not result %}
+
+        <!-- =================================================
+             INPUT FORM
+        ================================================== -->
+
+        <form method="POST"
+              action="{{ url_for('skill_gap.skill_gap') }}">
+
+            <!-- APTITUDE -->
+
+            <div class="form-group">
+
+                <label for="aptitude_score">
+                    Aptitude Score
+                </label>
+
+                <input
+                    type="number"
+                    id="aptitude_score"
+                    name="aptitude_score"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value="{{ inputs.aptitude_score|default('') }}"
+                    placeholder="Enter aptitude score"
+                    required
+                >
+
+            </div>
+
+
+            <!-- CODING -->
+
+            <div class="form-group">
+
+                <label for="coding_score">
+                    Coding Score
+                </label>
+
+                <input
+                    type="number"
+                    id="coding_score"
+                    name="coding_score"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value="{{ inputs.coding_score|default('') }}"
+                    placeholder="Enter coding score"
+                    required
+                >
+
+            </div>
+
+
+            <!-- COMMUNICATION -->
+
+            <div class="form-group">
+
+                <label for="communication_score">
+                    Communication Score
+                </label>
+
+                <input
+                    type="number"
+                    id="communication_score"
+                    name="communication_score"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value="{{ inputs.communication_score|default('') }}"
+                    placeholder="Enter communication score"
+                    required
+                >
+
+            </div>
+
+
+            <!-- TECHNICAL -->
+
+            <div class="form-group">
+
+                <label for="technical_score">
+                    Technical Score
+                </label>
+
+                <input
+                    type="number"
+                    id="technical_score"
+                    name="technical_score"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value="{{ inputs.technical_score|default('') }}"
+                    placeholder="Enter technical score"
+                    required
+                >
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button
+                type="submit"
+                class="prediction-button">
+
+                Analyze Skill Gap
+
+            </button>
+
+        </form>
+
+
+        {% else %}
+
+        <!-- =================================================
+             OVERALL RESULT
+        ================================================== -->
+
+        <div class="skill-gap-result">
+
+            <div class="skill-gap-status">
+
+                {{ result.overall_status }}
+
+            </div>
+
+
+            <div class="total-gap">
+
+                {{ result.total_gap }}
+
+            </div>
+
+
+            <div class="total-gap-label">
+
+                Total Skill Gap
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SKILL ANALYSIS
+        ================================================== -->
+
+        <h2 class="skill-section-title">
+            Skill Analysis
+        </h2>
+
+
+        <div class="skill-grid">
+
+            {% for skill, data in result.skills.items() %}
+
+            <div class="skill-card">
+
+                <div class="skill-name">
+
+                    {{ skill }}
+
+                </div>
+
+
+                <div class="skill-details">
+
+                    <!-- CURRENT SCORE -->
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Current Score
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {{ data.current_score }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- TARGET SCORE -->
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Target Score
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {{ data.target_score }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- SKILL GAP -->
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Skill Gap
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {{ data.gap }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Status
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {{ data.status }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- =================================================
+             PRIORITY SKILLS
+        ================================================== -->
+
+        <h2 class="skill-section-title">
+            Priority Skills
+        </h2>
+
+
+        <div class="priority-box">
+
+            {% if result.priority_skills %}
+
+                <p>
+                    Focus on improving:
+                </p>
+
+
+                <ul class="priority-list">
+
+                    {% for skill in result.priority_skills %}
+
+                        <li>
+                            {{ skill }}
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            {% else %}
+
+                <p>
+                    All target skills have been achieved.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =================================================
+             ACTION BUTTONS
+        ================================================== -->
+
+        <div class="skill-gap-actions">
+
+            <a
+                href="{{ url_for('skill_gap.skill_gap') }}"
+                class="analyze-button">
+
+                Analyze Again
+
+            </a>
+
+
+            <a
+                href="{{ url_for('dashboard.dashboard') }}"
+                class="dashboard-button">
+
+                Back to Dashboard
+
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

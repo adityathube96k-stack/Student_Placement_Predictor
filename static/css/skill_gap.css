@@ -1,0 +1,279 @@
+/* =====================================================
+   SKILL GAP ANALYSIS
+   ===================================================== */
+
+.skill-gap-container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.skill-gap-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 35px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.skill-gap-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.skill-gap-header h1 {
+    margin-bottom: 10px;
+    color: #172554;
+    font-size: 32px;
+}
+
+.skill-gap-header p {
+    color: #64748b;
+    font-size: 16px;
+}
+
+
+/* =====================================================
+   OVERALL RESULT
+   ===================================================== */
+
+.skill-gap-result {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 35px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.skill-gap-status {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 30px;
+    background: #dcfce7;
+    color: #166534;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.total-gap {
+    font-size: 56px;
+    font-weight: 800;
+    color: #2563eb;
+    line-height: 1.1;
+}
+
+.total-gap-label {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 16px;
+}
+
+
+/* =====================================================
+   SECTION TITLE
+   ===================================================== */
+
+.skill-section-title {
+    color: #172554;
+    font-size: 24px;
+    margin: 30px 0 18px;
+}
+
+
+/* =====================================================
+   SKILL GRID
+   ===================================================== */
+
+.skill-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+
+/* =====================================================
+   SKILL CARD
+   ===================================================== */
+
+.skill-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 22px;
+    background: #ffffff;
+    transition: 0.2s ease;
+}
+
+.skill-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+}
+
+.skill-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 18px;
+}
+
+
+/* =====================================================
+   SKILL DETAILS
+   ===================================================== */
+
+.skill-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.skill-detail {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.skill-detail-label {
+    display: block;
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.skill-detail-value {
+    display: block;
+    color: #0f172a;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   STATUS
+   ===================================================== */
+
+.skill-status {
+    margin-top: 16px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #334155;
+}
+
+
+/* =====================================================
+   PRIORITY SKILLS
+   ===================================================== */
+
+.priority-box {
+    margin-top: 30px;
+    padding: 25px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.priority-box p {
+    color: #64748b;
+    margin-bottom: 15px;
+}
+
+.priority-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.priority-list li {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 9px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   ACTION BUTTONS
+   ===================================================== */
+
+.skill-gap-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.skill-gap-actions a {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.analyze-button {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.dashboard-button {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+    .skill-gap-container {
+        padding: 10px;
+        margin: 20px auto;
+    }
+
+    .skill-gap-card {
+        padding: 20px;
+    }
+
+    .skill-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skill-details {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .skill-gap-actions {
+        flex-direction: column;
+    }
+
+    .total-gap {
+        font-size: 45px;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .skill-details {
+        grid-template-columns: 1fr;
+    }
+
+    .skill-gap-header h1 {
+        font-size: 26px;
+    }
+
+}

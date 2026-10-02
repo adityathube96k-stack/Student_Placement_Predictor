@@ -11,6 +11,9 @@ from database.db import test_connection
 from routes.auth_routes import auth_bp
 from routes.dashboard_routes import dashboard_bp
 from routes.prediction_routes import prediction_bp
+from routes.readiness_routes import readiness_bp
+from routes.skill_gap_routes import skill_gap_bp
+from routes.recommendation_routes import recommendation_bp
 
 
 app = Flask(__name__)
@@ -34,6 +37,18 @@ app.register_blueprint(
 
 app.register_blueprint(
     prediction_bp
+)
+
+app.register_blueprint(
+    readiness_bp
+)
+
+app.register_blueprint(
+    skill_gap_bp
+)
+
+app.register_blueprint(
+    recommendation_bp
 )
 
 

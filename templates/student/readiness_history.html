@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Prediction History | Student Placement Predictor</title>
+    <title>Readiness History | Student Placement Predictor</title>
 
     <style>
         * {
@@ -23,6 +23,7 @@
             background: #1e293b;
             color: white;
             padding: 20px 35px;
+
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -36,8 +37,10 @@
             text-decoration: none;
             background: white;
             color: #1e293b;
+
             padding: 10px 18px;
             border-radius: 6px;
+
             font-weight: bold;
         }
 
@@ -63,29 +66,40 @@
         .table-card {
             background: white;
             border-radius: 12px;
+
             padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+
+            box-shadow:
+                0 4px 15px rgba(0, 0, 0, 0.08);
+
             overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1000px;
+
+            min-width: 1100px;
         }
 
         th {
             background: #e2e8f0;
             color: #1e293b;
+
             padding: 14px 10px;
+
             text-align: center;
+
             font-size: 14px;
         }
 
         td {
             padding: 13px 10px;
+
             text-align: center;
+
             border-bottom: 1px solid #e5e7eb;
+
             font-size: 14px;
         }
 
@@ -93,61 +107,110 @@
             background: #f8fafc;
         }
 
-        .placed {
+        .score {
+            font-weight: bold;
+        }
+
+        .excellent {
             display: inline-block;
+
             background: #dcfce7;
             color: #166534;
+
             padding: 6px 12px;
+
             border-radius: 20px;
+
             font-weight: bold;
         }
 
-        .not-placed {
+        .good {
             display: inline-block;
+
+            background: #dbeafe;
+            color: #1d4ed8;
+
+            padding: 6px 12px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+        }
+
+        .moderate {
+            display: inline-block;
+
+            background: #fef3c7;
+            color: #92400e;
+
+            padding: 6px 12px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+        }
+
+        .needs-improvement {
+            display: inline-block;
+
             background: #fee2e2;
             color: #991b1b;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
 
-        .probability {
+            padding: 6px 12px;
+
+            border-radius: 20px;
+
             font-weight: bold;
         }
 
         .empty {
             text-align: center;
+
             padding: 50px 20px;
+
             color: #64748b;
         }
 
         .empty h3 {
             margin-bottom: 10px;
+
             color: #334155;
         }
 
-        .predict-btn {
+        .readiness-btn {
             display: inline-block;
+
             margin-top: 15px;
+
             text-decoration: none;
+
             background: #2563eb;
             color: white;
+
             padding: 11px 20px;
+
             border-radius: 6px;
+
             font-weight: bold;
         }
 
         .footer {
             text-align: center;
+
             color: #64748b;
+
             padding: 25px;
+
             margin-top: 30px;
         }
 
         @media (max-width: 768px) {
+
             .header {
                 padding: 15px 20px;
+
                 flex-direction: column;
+
                 gap: 15px;
             }
 
@@ -165,42 +228,70 @@
 <body>
 
     <header class="header">
-        <h1>Student Placement Predictor</h1>
 
-        <a href="{{ url_for('dashboard.dashboard') }}" class="back-btn">
+        <h1>
+            Student Placement Predictor
+        </h1>
+
+        <a
+            href="{{ url_for('dashboard.dashboard') }}"
+            class="back-btn"
+        >
             ← Dashboard
         </a>
+
     </header>
+
 
     <main class="container">
 
         <div class="page-title">
-            <h2>Prediction History</h2>
+
+            <h2>
+                Readiness History
+            </h2>
+
             <p>
-                View your previous placement prediction results.
+                View your previous placement readiness scores.
             </p>
+
         </div>
+
 
         <div class="table-card">
 
             {% if history %}
 
             <table>
+
                 <thead>
+
                     <tr>
+
                         <th>#</th>
+
                         <th>CGPA</th>
+
                         <th>Attendance</th>
+
                         <th>Aptitude</th>
+
                         <th>Coding</th>
+
                         <th>Communication</th>
+
                         <th>Technical</th>
-                        <th>Prediction</th>
-                        <th>Placement Probability</th>
-                        <th>Not Placed Probability</th>
+
+                        <th>Readiness Score</th>
+
+                        <th>Readiness Level</th>
+
                         <th>Date</th>
+
                     </tr>
+
                 </thead>
+
 
                 <tbody>
 
@@ -236,30 +327,38 @@
                             {{ record.technical_score }}
                         </td>
 
+                        <td class="score">
+                            {{ record.readiness_score }}%
+                        </td>
+
                         <td>
 
-                            {% if record.prediction == "Placed" %}
+                            {% if record.readiness_level == "Excellent" %}
 
-                                <span class="placed">
-                                    Placed
+                                <span class="excellent">
+                                    Excellent
+                                </span>
+
+                            {% elif record.readiness_level == "Good" %}
+
+                                <span class="good">
+                                    Good
+                                </span>
+
+                            {% elif record.readiness_level == "Moderate" %}
+
+                                <span class="moderate">
+                                    Moderate
                                 </span>
 
                             {% else %}
 
-                                <span class="not-placed">
-                                    Not Placed
+                                <span class="needs-improvement">
+                                    Needs Improvement
                                 </span>
 
                             {% endif %}
 
-                        </td>
-
-                        <td class="probability">
-                            {{ record.placement_probability }}%
-                        </td>
-
-                        <td class="probability">
-                            {{ record.not_placed_probability }}%
                         </td>
 
                         <td>
@@ -278,17 +377,19 @@
 
             <div class="empty">
 
-                <h3>No Prediction History Found</h3>
+                <h3>
+                    No Readiness History Found
+                </h3>
 
                 <p>
-                    You have not generated any placement predictions yet.
+                    You have not calculated a readiness score yet.
                 </p>
 
                 <a
-                    href="{{ url_for('prediction.prediction') }}"
-                    class="predict-btn"
+                    href="{{ url_for('readiness.readiness_score') }}"
+                    class="readiness-btn"
                 >
-                    Generate Prediction
+                    Calculate Readiness Score
                 </a>
 
             </div>
@@ -299,8 +400,11 @@
 
     </main>
 
+
     <footer class="footer">
+
         Student Placement Predictor © 2026
+
     </footer>
 
 </body>

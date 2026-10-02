@@ -8,62 +8,89 @@ from flask import (
     flash
 )
 
-from ml.predict import predict_placement
 from database.db import get_connection
+from utils.readiness import calculate_readiness_score
 
 
-prediction_bp = Blueprint(
-    "prediction",
+readiness_bp = Blueprint(
+    "readiness",
     __name__,
     url_prefix="/student"
 )
 
 
-@prediction_bp.route(
-    "/prediction",
+@readiness_bp.route(
+    "/readiness-score",
     methods=["GET", "POST"]
 )
-def prediction():
+def readiness_score():
 
     if "user_id" not in session:
-        return redirect(url_for("auth.login"))
+        return redirect(
+            url_for("auth.login")
+        )
 
     if session.get("role") != "student":
-        flash("Access denied.", "danger")
-        return redirect(url_for("auth.login"))
+        flash(
+            "Access denied.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("auth.login")
+        )
 
     if request.method == "GET":
+
         return render_template(
-            "student/prediction.html"
+            "student/readiness_score.html"
         )
 
     try:
 
         cgpa = float(
-            request.form.get("cgpa", 0)
+            request.form.get(
+                "cgpa",
+                0
+            )
         )
 
         attendance = float(
-            request.form.get("attendance", 0)
+            request.form.get(
+                "attendance",
+                0
+            )
         )
 
         aptitude_score = float(
-            request.form.get("aptitude_score", 0)
+            request.form.get(
+                "aptitude_score",
+                0
+            )
         )
 
         coding_score = float(
-            request.form.get("coding_score", 0)
+            request.form.get(
+                "coding_score",
+                0
+            )
         )
 
         communication_score = float(
-            request.form.get("communication_score", 0)
+            request.form.get(
+                "communication_score",
+                0
+            )
         )
 
         technical_score = float(
-            request.form.get("technical_score", 0)
+            request.form.get(
+                "technical_score",
+                0
+            )
         )
 
-        result = predict_placement(
+        result = calculate_readiness_score(
             cgpa=cgpa,
             attendance=attendance,
             aptitude_score=aptitude_score,
@@ -82,7 +109,7 @@ def prediction():
 
                 cursor.execute(
                     """
-                    INSERT INTO prediction_history (
+                    INSERT INTO readiness_history (
                         user_id,
                         cgpa,
                         attendance,
@@ -90,12 +117,10 @@ def prediction():
                         coding_score,
                         communication_score,
                         technical_score,
-                        prediction,
-                        placement_probability,
-                        not_placed_probability
+                        readiness_score,
+                        readiness_level
                     )
                     VALUES (
-                        %s,
                         %s,
                         %s,
                         %s,
@@ -115,21 +140,20 @@ def prediction():
                         coding_score,
                         communication_score,
                         technical_score,
-                        result["result"],
-                        result["placement_probability"],
-                        result["not_placed_probability"]
+                        result["readiness_score"],
+                        result["readiness_level"]
                     )
                 )
 
         except Exception as error:
 
             print(
-                "Prediction History Error:",
+                "Readiness History Error:",
                 error
             )
 
             flash(
-                "Prediction generated, but history could not be saved.",
+                "Readiness score calculated, but history could not be saved.",
                 "warning"
             )
 
@@ -139,7 +163,7 @@ def prediction():
                 connection.close()
 
         return render_template(
-            "student/result.html",
+            "student/readiness_score.html",
             result=result,
             inputs={
                 "cgpa": cgpa,
@@ -160,37 +184,37 @@ def prediction():
 
         return redirect(
             url_for(
-                "prediction.prediction"
+                "readiness.readiness_score"
             )
         )
 
     except Exception as error:
 
         print(
-            "Prediction Route Error:",
+            "Readiness Route Error:",
             error
         )
 
         flash(
-            "Unable to generate placement prediction.",
+            "Unable to calculate readiness score.",
             "danger"
         )
 
         return redirect(
             url_for(
-                "prediction.prediction"
+                "readiness.readiness_score"
             )
         )
 
 
 # ==========================================================
-# PREDICTION HISTORY
+# READINESS HISTORY
 # ==========================================================
 
-@prediction_bp.route(
-    "/prediction-history"
+@readiness_bp.route(
+    "/readiness-history"
 )
-def prediction_history():
+def readiness_history():
 
     if "user_id" not in session:
         return redirect(
@@ -225,11 +249,10 @@ def prediction_history():
                     coding_score,
                     communication_score,
                     technical_score,
-                    prediction,
-                    placement_probability,
-                    not_placed_probability,
+                    readiness_score,
+                    readiness_level,
                     created_at
-                FROM prediction_history
+                FROM readiness_history
                 WHERE user_id = %s
                 ORDER BY created_at DESC
                 """,
@@ -241,19 +264,19 @@ def prediction_history():
             history = cursor.fetchall()
 
         return render_template(
-            "student/prediction_history.html",
+            "student/readiness_history.html",
             history=history
         )
 
     except Exception as error:
 
         print(
-            "Prediction History Route Error:",
+            "Readiness History Route Error:",
             error
         )
 
         flash(
-            "Unable to load prediction history.",
+            "Unable to load readiness history.",
             "danger"
         )
 

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Personalized Skill Recommendations</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/prediction.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/recommendations.css') }}">
+
+</head>
+
+
+<body>
+
+<div class="recommendation-container">
+
+    <div class="recommendation-card">
+
+
+        <!-- =================================================
+             HEADER
+        ================================================== -->
+
+        <div class="recommendation-header">
+
+            <h1>
+                Personalized Skill Recommendations
+            </h1>
+
+            <p>
+                Improve your placement preparation
+                based on your current skill gaps.
+            </p>
+
+        </div>
+
+
+        <!-- =================================================
+             OVERALL SUMMARY
+        ================================================== -->
+
+        <div class="recommendation-summary">
+
+            <div class="recommendation-status">
+
+                {{ skill_gap.overall_status }}
+
+            </div>
+
+
+            <div class="recommendation-total">
+
+                {{ skill_gap.total_gap }}
+
+            </div>
+
+
+            <div class="recommendation-total-label">
+
+                Total Skill Gap
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             RECOMMENDATIONS
+        ================================================== -->
+
+        {% if recommendations %}
+
+        <div class="recommendation-grid">
+
+
+            {% for recommendation in recommendations %}
+
+            <div class="recommendation-item">
+
+
+                <!-- =========================================
+                     SKILL HEADER
+                ========================================== -->
+
+                <div class="recommendation-skill-header">
+
+                    <div class="recommendation-skill">
+
+                        {{ recommendation.skill }}
+
+                    </div>
+
+
+                    <div class="
+                        priority-badge
+                        priority-{{ recommendation.priority|lower }}
+                    ">
+
+                        {{ recommendation.priority }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     SCORE INFORMATION
+                ========================================== -->
+
+                <div class="score-grid">
+
+
+                    <div class="score-box">
+
+                        <span class="score-label">
+                            Current Score
+                        </span>
+
+                        <span class="score-value">
+
+                            {{ recommendation.current_score }}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="score-box">
+
+                        <span class="score-label">
+                            Target Score
+                        </span>
+
+                        <span class="score-value">
+
+                            {{ recommendation.target_score }}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="score-box">
+
+                        <span class="score-label">
+                            Skill Gap
+                        </span>
+
+                        <span class="score-value">
+
+                            {{ recommendation.gap }}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     RECOMMENDED TOPICS
+                ========================================== -->
+
+                <div class="recommendation-section">
+
+                    <h3>
+                        Recommended Topics
+                    </h3>
+
+
+                    <ul>
+
+                        {% for topic in recommendation.topics %}
+
+                        <li>
+                            {{ topic }}
+                        </li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                </div>
+
+
+                <!-- =========================================
+                     RECOMMENDED ACTIONS
+                ========================================== -->
+
+                <div class="recommendation-section">
+
+                    <h3>
+                        Recommended Actions
+                    </h3>
+
+
+                    <ul>
+
+                        {% for action in recommendation.actions %}
+
+                        <li>
+                            {{ action }}
+                        </li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% else %}
+
+
+        <!-- =================================================
+             NO RECOMMENDATIONS
+        ================================================== -->
+
+        <div class="recommendation-empty">
+
+            <h2>
+                All Skills Target Achieved 🎉
+            </h2>
+
+            <p>
+                Your current skills have reached
+                the required target levels.
+            </p>
+
+        </div>
+
+
+        {% endif %}
+
+
+        <!-- =================================================
+             ACTION BUTTONS
+        ================================================== -->
+
+        <div class="recommendation-actions">
+
+            <a
+                href="{{ url_for('skill_gap.skill_gap') }}"
+                class="view-gap-button">
+
+                View Skill Gap
+
+            </a>
+
+
+            <a
+                href="{{ url_for('dashboard.dashboard') }}"
+                class="recommendation-dashboard-button">
+
+                Back to Dashboard
+
+            </a>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

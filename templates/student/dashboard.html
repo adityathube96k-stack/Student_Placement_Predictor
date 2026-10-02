@@ -15,6 +15,7 @@
 
 </head>
 
+
 <body>
 
 
@@ -27,7 +28,6 @@
         <div class="logo">
             Student Placement Predictor
         </div>
-
 
         <div class="nav-links">
 
@@ -48,7 +48,6 @@
     </nav>
 
 
-
     <!-- ==================================================
          MAIN CONTAINER
     =================================================== -->
@@ -57,7 +56,7 @@
 
 
         <!-- ==================================================
-             WELCOME SECTION
+             WELCOME
         =================================================== -->
 
         <section class="welcome-card">
@@ -77,7 +76,6 @@
             </p>
 
         </section>
-
 
 
         <!-- ==================================================
@@ -100,7 +98,6 @@
 
                 </div>
 
-
                 <a
                     href="{{ url_for('dashboard.profile') }}"
                     class="btn"
@@ -111,11 +108,8 @@
             </div>
 
 
-
             <div class="profile-grid">
 
-
-                <!-- Full Name -->
 
                 <div class="info-card">
 
@@ -130,9 +124,6 @@
                 </div>
 
 
-
-                <!-- Email -->
-
                 <div class="info-card">
 
                     <h3>
@@ -145,9 +136,6 @@
 
                 </div>
 
-
-
-                <!-- Enrollment -->
 
                 <div class="info-card">
 
@@ -162,9 +150,6 @@
                 </div>
 
 
-
-                <!-- Phone -->
-
                 <div class="info-card">
 
                     <h3>
@@ -178,9 +163,6 @@
                 </div>
 
 
-
-                <!-- Branch -->
-
                 <div class="info-card">
 
                     <h3>
@@ -193,9 +175,6 @@
 
                 </div>
 
-
-
-                <!-- Year -->
 
                 <div class="info-card">
 
@@ -219,14 +198,14 @@
 
                 </div>
 
+
             </div>
 
         </section>
 
 
-
         <!-- ==================================================
-             ACADEMIC INFORMATION
+             ACADEMIC & SKILL SCORES
         =================================================== -->
 
         <section class="section">
@@ -247,7 +226,6 @@
                 </div>
 
             </div>
-
 
 
             <div class="score-grid">
@@ -278,7 +256,6 @@
                 </div>
 
 
-
                 <!-- Attendance -->
 
                 <div class="score-card">
@@ -302,7 +279,6 @@
                     </strong>
 
                 </div>
-
 
 
                 <!-- Aptitude -->
@@ -330,7 +306,6 @@
                 </div>
 
 
-
                 <!-- Coding -->
 
                 <div class="score-card">
@@ -354,7 +329,6 @@
                     </strong>
 
                 </div>
-
 
 
                 <!-- Communication -->
@@ -382,7 +356,6 @@
                 </div>
 
 
-
                 <!-- Technical -->
 
                 <div class="score-card">
@@ -407,10 +380,10 @@
 
                 </div>
 
+
             </div>
 
         </section>
-
 
 
         <!-- ==================================================
@@ -428,8 +401,7 @@
                     </h2>
 
                     <p class="section-description">
-                        AI-powered features that will be added
-                        throughout the project.
+                        AI-powered tools for your placement preparation.
                     </p>
 
                 </div>
@@ -437,11 +409,12 @@
             </div>
 
 
-
             <div class="feature-grid">
 
 
-                <!-- Prediction -->
+                <!-- ==================================================
+                     PLACEMENT PREDICTION
+                =================================================== -->
 
                 <div class="feature-card">
 
@@ -459,18 +432,19 @@
                         learning.
                     </p>
 
-                    <button
-                        type="button"
-                        disabled
+                    <a
+                        href="{{ url_for('prediction.prediction') }}"
+                        class="btn primary"
                     >
-                        Coming Soon
-                    </button>
+                        Predict Placement
+                    </a>
 
                 </div>
 
 
-
-                <!-- Readiness -->
+                <!-- ==================================================
+                     READINESS SCORE
+                =================================================== -->
 
                 <div class="feature-card">
 
@@ -487,18 +461,19 @@
                         preparation score.
                     </p>
 
-                    <button
-                        type="button"
-                        disabled
+                    <a
+                        href="{{ url_for('readiness.readiness_score') }}"
+                        class="btn primary"
                     >
-                        Coming Soon
-                    </button>
+                        Check Readiness
+                    </a>
 
                 </div>
 
 
-
-                <!-- Skill Gap -->
+                <!-- ==================================================
+                     SKILL GAP
+                =================================================== -->
 
                 <div class="feature-card">
 
@@ -515,18 +490,135 @@
                         for better placement opportunities.
                     </p>
 
-                    <button
-                        type="button"
-                        disabled
+                    <a
+                        href="{{ url_for('skill_gap.skill_gap') }}"
+                        class="btn primary"
                     >
-                        Coming Soon
-                    </button>
+                        Analyze Skill Gap
+                    </a>
 
                 </div>
 
 
+                <!-- ==================================================
+                     PERSONALIZED RECOMMENDATIONS
+                =================================================== -->
 
-                <!-- Resume -->
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        💡
+                    </div>
+
+                    <h3>
+                        Personalized Recommendations
+                    </h3>
+
+                    <p>
+                        Get personalized topics and actions
+                        based on your skill gaps.
+                    </p>
+
+                    <a
+                        href="{{ url_for('recommendation.recommendations') }}"
+                        class="btn primary"
+                    >
+                        View Recommendations
+                    </a>
+
+                </div>
+
+
+                <!-- ==================================================
+                     PREDICTION HISTORY
+                =================================================== -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        📋
+                    </div>
+
+                    <h3>
+                        Prediction History
+                    </h3>
+
+                    <p>
+                        View your previous placement predictions
+                        and placement probabilities.
+                    </p>
+
+                    <a
+                        href="{{ url_for('prediction.prediction_history') }}"
+                        class="btn primary"
+                    >
+                        View History
+                    </a>
+
+                </div>
+
+
+                <!-- ==================================================
+                     READINESS HISTORY
+                =================================================== -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        📈
+                    </div>
+
+                    <h3>
+                        Readiness History
+                    </h3>
+
+                    <p>
+                        View your previous placement readiness
+                        scores and readiness levels.
+                    </p>
+
+                    <a
+                        href="{{ url_for('readiness.readiness_history') }}"
+                        class="btn primary"
+                    >
+                        View History
+                    </a>
+
+                </div>
+
+
+                <!-- ==================================================
+                     SKILL GAP HISTORY
+                =================================================== -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        🎯
+                    </div>
+
+                    <h3>
+                        Skill Gap History
+                    </h3>
+
+                    <p>
+                        View your previous skill gap analysis
+                        and improvement status.
+                    </p>
+
+                    <a
+                        href="{{ url_for('skill_gap.skill_gap_history') }}"
+                        class="btn primary"
+                    >
+                        View History
+                    </a>
+
+                </div>
+
+
+                <!-- ==================================================
+                     RESUME ANALYZER
+                =================================================== -->
 
                 <div class="feature-card">
 
@@ -553,8 +645,9 @@
                 </div>
 
 
-
-                <!-- Company -->
+                <!-- ==================================================
+                     COMPANY ELIGIBILITY
+                =================================================== -->
 
                 <div class="feature-card">
 
@@ -581,8 +674,9 @@
                 </div>
 
 
-
-                <!-- Interview -->
+                <!-- ==================================================
+                     MOCK INTERVIEW
+                =================================================== -->
 
                 <div class="feature-card">
 
@@ -608,10 +702,10 @@
 
                 </div>
 
+
             </div>
 
         </section>
-
 
 
         <!-- ==================================================
@@ -640,7 +734,6 @@
 
 
     </main>
-
 
 
     <!-- ==================================================
