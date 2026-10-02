@@ -661,16 +661,16 @@
                     </h3>
 
                     <p>
-                        Check which companies you may be
-                        eligible for based on your profile.
+                        Check which companies you are eligible for
+                        based on your academic and skill profile.
                     </p>
 
-                    <button
-                        type="button"
-                        disabled
+                    <a
+                        href="{{ url_for('company.company_eligibility') }}"
+                        class="btn primary"
                     >
-                        Coming Soon
-                    </button>
+                        Check Eligibility
+                    </a>
 
                 </div>
 
@@ -756,4 +756,4 @@
 
 </body>
 
-</html> 
+</html>

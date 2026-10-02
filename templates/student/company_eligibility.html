@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Company Eligibility | Student Placement Predictor
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+    <style>
+
+        /* ==================================================
+           HEADER
+        =================================================== */
+
+        .eligibility-header {
+            margin-bottom: 30px;
+        }
+
+        .eligibility-header h1 {
+            margin-bottom: 8px;
+        }
+
+        .eligibility-header p {
+            color: #666;
+        }
+
+
+        /* ==================================================
+           SUMMARY
+        =================================================== */
+
+        .eligibility-summary {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(220px, 1fr)
+                );
+
+            gap: 20px;
+
+            margin-bottom: 30px;
+        }
+
+
+        .summary-card {
+
+            padding: 25px;
+
+            border-radius: 12px;
+
+            background: white;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0, 0, 0, 0.08);
+        }
+
+
+        .summary-card h3 {
+            margin-bottom: 10px;
+        }
+
+
+        .summary-number {
+
+            font-size: 32px;
+
+            font-weight: 700;
+        }
+
+
+        /* ==================================================
+           COMPANY GRID
+        =================================================== */
+
+        .company-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(300px, 1fr)
+                );
+
+            gap: 25px;
+        }
+
+
+        .company-card {
+
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 25px;
+
+            box-shadow:
+                0 4px 18px
+                rgba(0, 0, 0, 0.08);
+        }
+
+
+        .company-card h2 {
+            margin-bottom: 10px;
+        }
+
+
+        /* ==================================================
+           STATUS
+        =================================================== */
+
+        .status {
+
+            display: inline-block;
+
+            padding: 7px 14px;
+
+            border-radius: 20px;
+
+            font-weight: 600;
+
+            margin-bottom: 20px;
+        }
+
+
+        .status.eligible {
+
+            background: #e8f7ee;
+
+            color: #16803c;
+        }
+
+
+        .status.not-eligible {
+
+            background: #fdecec;
+
+            color: #c62828;
+        }
+
+
+        /* ==================================================
+           REQUIREMENTS
+        =================================================== */
+
+        .requirements {
+            margin-top: 15px;
+        }
+
+
+        .requirements p {
+            margin: 8px 0;
+        }
+
+
+        .requirements strong {
+
+            display: inline-block;
+
+            min-width: 150px;
+        }
+
+
+        /* ==================================================
+           MISSING REQUIREMENTS
+        =================================================== */
+
+        .missing-box {
+
+            margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            background: #fff4f4;
+
+            border-left:
+                4px solid #c62828;
+        }
+
+
+        .missing-box h4 {
+
+            margin-bottom: 10px;
+
+            color: #c62828;
+        }
+
+
+        .missing-box ul {
+
+            margin: 0;
+
+            padding-left: 20px;
+        }
+
+
+        .missing-box li {
+
+            margin-bottom: 8px;
+
+            line-height: 1.5;
+        }
+
+
+        /* ==================================================
+           MISSING SKILLS
+        =================================================== */
+
+        .missing-skills-box {
+
+            margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            background: #fff8e1;
+
+            border-left:
+                4px solid #f39c12;
+        }
+
+
+        .missing-skills-box h4 {
+
+            margin-bottom: 10px;
+
+            color: #b26a00;
+        }
+
+
+        .missing-skills-box ul {
+
+            margin: 0;
+
+            padding-left: 20px;
+        }
+
+
+        .missing-skills-box li {
+
+            margin-bottom: 6px;
+
+            font-weight: 500;
+        }
+
+
+        /* ==================================================
+           REQUIRED SKILLS
+        =================================================== */
+
+        .skills-box {
+
+            margin-top: 20px;
+        }
+
+
+        .skill-tag {
+
+            display: inline-block;
+
+            padding: 6px 10px;
+
+            margin: 4px;
+
+            border-radius: 15px;
+
+            background: #eef3ff;
+
+            color: #3155a6;
+
+            font-size: 14px;
+        }
+
+
+        /* ==================================================
+           STUDENT SCORES
+        =================================================== */
+
+        .student-score {
+
+            margin-bottom: 30px;
+
+            padding: 20px;
+
+            background: white;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0, 0, 0, 0.08);
+        }
+
+
+        /* ==================================================
+           STUDENT SKILLS
+        =================================================== */
+
+        .student-skills {
+
+            margin-top: 20px;
+
+            padding: 15px;
+
+            background: #f7f9fc;
+
+            border-radius: 10px;
+        }
+
+
+        .student-skills strong {
+            color: #333;
+        }
+
+
+        /* ==================================================
+           BACK BUTTON
+        =================================================== */
+
+        .back-button {
+            margin-top: 30px;
+        }
+
+
+        /* ==================================================
+           MOBILE
+        =================================================== */
+
+        @media (max-width: 600px) {
+
+            .company-card {
+                padding: 18px;
+            }
+
+            .requirements strong {
+                min-width: 120px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ==================================================
+         NAVBAR
+    =================================================== -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            Student Placement Predictor
+        </div>
+
+
+        <div class="nav-links">
+
+            <a href="{{ url_for('dashboard.dashboard') }}">
+                Dashboard
+            </a>
+
+
+            <a href="{{ url_for('dashboard.profile') }}">
+                My Profile
+            </a>
+
+
+            <a href="{{ url_for('auth.logout') }}">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- ==================================================
+         MAIN
+    =================================================== -->
+
+    <main class="container">
+
+
+        <!-- ==================================================
+             HEADER
+        =================================================== -->
+
+        <section class="eligibility-header">
+
+            <h1>
+                🏢 Company Eligibility
+            </h1>
+
+
+            <p>
+                Check which companies you are eligible for
+                based on your academic and skill profile.
+            </p>
+
+        </section>
+
+
+        <!-- ==================================================
+             STUDENT SCORES
+        =================================================== -->
+
+        <section class="student-score">
+
+            <h2>
+                Your Current Scores
+            </h2>
+
+
+            <div class="score-grid">
+
+
+                <!-- CGPA -->
+
+                <div class="score-card">
+
+                    <span>
+                        CGPA
+                    </span>
+
+                    <strong>
+                        {{ student.cgpa }}
+                    </strong>
+
+                </div>
+
+
+                <!-- ATTENDANCE -->
+
+                <div class="score-card">
+
+                    <span>
+                        Attendance
+                    </span>
+
+                    <strong>
+                        {{ student.attendance }}%
+                    </strong>
+
+                </div>
+
+
+                <!-- APTITUDE -->
+
+                <div class="score-card">
+
+                    <span>
+                        Aptitude
+                    </span>
+
+                    <strong>
+                        {{ student.aptitude_score }}
+                    </strong>
+
+                </div>
+
+
+                <!-- CODING -->
+
+                <div class="score-card">
+
+                    <span>
+                        Coding
+                    </span>
+
+                    <strong>
+                        {{ student.coding_score }}
+                    </strong>
+
+                </div>
+
+
+                <!-- COMMUNICATION -->
+
+                <div class="score-card">
+
+                    <span>
+                        Communication
+                    </span>
+
+                    <strong>
+                        {{ student.communication_score }}
+                    </strong>
+
+                </div>
+
+
+                <!-- TECHNICAL -->
+
+                <div class="score-card">
+
+                    <span>
+                        Technical
+                    </span>
+
+                    <strong>
+                        {{ student.technical_score }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 STUDENT SKILLS
+            =================================================== -->
+
+            <div class="student-skills">
+
+                <strong>
+                    Your Skills:
+                </strong>
+
+                {% if student.skills %}
+
+                    {{ student.skills }}
+
+                {% else %}
+
+                    No skills added yet.
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             SUMMARY
+        =================================================== -->
+
+        <section class="eligibility-summary">
+
+
+            <!-- TOTAL -->
+
+            <div class="summary-card">
+
+                <h3>
+                    Total Companies
+                </h3>
+
+                <div class="summary-number">
+                    {{ results|length }}
+                </div>
+
+            </div>
+
+
+            <!-- ELIGIBLE -->
+
+            <div class="summary-card">
+
+                <h3>
+                    Eligible Companies
+                </h3>
+
+                <div class="summary-number">
+                    {{ eligible_count }}
+                </div>
+
+            </div>
+
+
+            <!-- NOT ELIGIBLE -->
+
+            <div class="summary-card">
+
+                <h3>
+                    Not Eligible
+                </h3>
+
+                <div class="summary-number">
+                    {{ not_eligible_count }}
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             COMPANY RESULTS
+        =================================================== -->
+
+        <section>
+
+            <div class="company-grid">
+
+
+                {% for result in results %}
+
+
+                    <!-- ==================================================
+                         COMPANY CARD
+                    =================================================== -->
+
+                    <div class="company-card">
+
+
+                        <h2>
+                            {{ result.company }}
+                        </h2>
+
+
+                        <!-- STATUS -->
+
+                        {% if result.eligible %}
+
+                            <span class="status eligible">
+
+                                ✓ Eligible
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="status not-eligible">
+
+                                ✗ Not Eligible
+
+                            </span>
+
+                        {% endif %}
+
+
+                        <!-- ==================================================
+                             MINIMUM REQUIREMENTS
+                        =================================================== -->
+
+                        <div class="requirements">
+
+                            <h3>
+                                Minimum Requirements
+                            </h3>
+
+
+                            <p>
+
+                                <strong>
+                                    CGPA:
+                                </strong>
+
+                                {{ result.requirements.cgpa }}
+
+                            </p>
+
+
+                            <p>
+
+                                <strong>
+                                    Attendance:
+                                </strong>
+
+                                {{ result.requirements.attendance }}%
+
+                            </p>
+
+
+                            <p>
+
+                                <strong>
+                                    Aptitude:
+                                </strong>
+
+                                {{ result.requirements.aptitude_score }}
+
+                            </p>
+
+
+                            <p>
+
+                                <strong>
+                                    Coding:
+                                </strong>
+
+                                {{ result.requirements.coding_score }}
+
+                            </p>
+
+
+                            <p>
+
+                                <strong>
+                                    Communication:
+                                </strong>
+
+                                {{ result.requirements.communication_score }}
+
+                            </p>
+
+
+                            <p>
+
+                                <strong>
+                                    Technical:
+                                </strong>
+
+                                {{ result.requirements.technical_score }}
+
+                            </p>
+
+                        </div>
+
+
+                        <!-- ==================================================
+                             MISSING REQUIREMENTS
+                        =================================================== -->
+
+                        {% if result.missing_requirements %}
+
+                            <div class="missing-box">
+
+                                <h4>
+                                    Missing Requirements
+                                </h4>
+
+
+                                <ul>
+
+                                    {% for item in result.missing_requirements %}
+
+                                        <li>
+
+                                            <strong>
+                                                {{ item.requirement }}
+                                            </strong>
+
+                                            — Your Score:
+                                            {{ item.student_score }}
+
+                                            | Required:
+                                            {{ item.required_score }}
+
+                                            | Gap:
+                                            {{ item.gap }}
+
+                                        </li>
+
+                                    {% endfor %}
+
+                                </ul>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- ==================================================
+                             MISSING SKILLS
+                        =================================================== -->
+
+                        {% if result.missing_skills %}
+
+                            <div class="missing-skills-box">
+
+                                <h4>
+                                    Missing Skills
+                                </h4>
+
+
+                                <ul>
+
+                                    {% for skill in result.missing_skills %}
+
+                                        <li>
+                                            {{ skill }}
+                                        </li>
+
+                                    {% endfor %}
+
+                                </ul>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- ==================================================
+                             REQUIRED SKILLS
+                        =================================================== -->
+
+                        <div class="skills-box">
+
+                            <h3>
+                                Required Skills
+                            </h3>
+
+
+                            {% if result.required_skills %}
+
+                                {% for skill in result.required_skills %}
+
+                                    <span class="skill-tag">
+                                        {{ skill }}
+                                    </span>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <p>
+                                    No specific skills listed.
+                                </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+                    </div>
+
+
+                {% endfor %}
+
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             BACK BUTTON
+        =================================================== -->
+
+        <div class="back-button">
+
+            <a
+                href="{{ url_for('dashboard.dashboard') }}"
+                class="btn primary"
+            >
+                ← Back to Dashboard
+            </a>
+
+        </div>
+
+
+    </main>
+
+
+    <!-- ==================================================
+         FOOTER
+    =================================================== -->
+
+    <footer class="footer">
+
+        <p>
+            © 2026 Student Placement Predictor
+        </p>
+
+
+        <p>
+            AI-Powered Career & Placement Intelligence System
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>
