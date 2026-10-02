@@ -14,6 +14,7 @@ from routes.prediction_routes import prediction_bp
 from routes.readiness_routes import readiness_bp
 from routes.skill_gap_routes import skill_gap_bp
 from routes.recommendation_routes import recommendation_bp
+from routes.resume_routes import resume_bp
 
 
 app = Flask(__name__)
@@ -49,6 +50,10 @@ app.register_blueprint(
 
 app.register_blueprint(
     recommendation_bp
+)
+
+app.register_blueprint(
+    resume_bp
 )
 
 

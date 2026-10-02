@@ -631,16 +631,17 @@
                     </h3>
 
                     <p>
-                        Upload your resume and receive an
-                        AI-based resume score.
+                        Upload your resume and get an automated
+                        resume score, skill analysis and
+                        personalized improvement suggestions.
                     </p>
 
-                    <button
-                        type="button"
-                        disabled
+                    <a
+                        href="{{ url_for('resume.resume_upload') }}"
+                        class="btn primary"
                     >
-                        Coming Soon
-                    </button>
+                        Analyze Resume
+                    </a>
 
                 </div>
 
@@ -755,4 +756,4 @@
 
 </body>
 
-</html>
+</html> 
