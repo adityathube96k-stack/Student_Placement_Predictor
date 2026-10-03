@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Interview Result | Student Placement Predictor
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: #111827;
+            color: white;
+            padding: 18px 40px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            font-size: 21px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .result-header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .result-header h1 {
+            margin-bottom: 10px;
+        }
+
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2563eb;
+            margin: 15px 0;
+        }
+
+        .score-label {
+            color: #6b7280;
+        }
+
+        .feedback {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .feedback h2 {
+            margin-bottom: 15px;
+        }
+
+        .feedback ul {
+            padding-left: 22px;
+        }
+
+        .feedback li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .question-card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-number {
+            color: #2563eb;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .answer {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .answer-title {
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        .evaluation {
+            padding: 15px;
+            border-radius: 8px;
+            background: #eff6ff;
+        }
+
+        .evaluation-row {
+            margin-bottom: 10px;
+        }
+
+        .evaluation-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .matched {
+            color: #166534;
+        }
+
+        .missing {
+            color: #b91c1c;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: #eef2ff;
+            color: #3730a3;
+            font-weight: bold;
+        }
+
+        .buttons {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            margin: 5px;
+
+            border-radius: 8px;
+
+            text-decoration: none;
+
+            color: white;
+            background: #2563eb;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn.secondary {
+            background: #374151;
+        }
+
+        .btn.secondary:hover {
+            background: #1f2937;
+        }
+
+        @media (max-width: 600px) {
+
+            .navbar {
+                padding: 15px 20px;
+
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .score {
+                font-size: 40px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <h2>
+            Student Placement Predictor
+        </h2>
+
+        <div>
+
+            <a
+                href="{{ url_for('dashboard.dashboard') }}"
+            >
+                Dashboard
+            </a>
+
+            <a
+                href="{{ url_for('auth.logout') }}"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <main class="container">
+
+
+        <!-- SCORE -->
+
+        <section class="result-header">
+
+            <h1>
+                🎯 Interview Result
+            </h1>
+
+            <p class="score-label">
+                Your Overall Interview Score
+            </p>
+
+            <div class="score">
+                {{ score }}%
+            </div>
+
+        </section>
+
+
+        <!-- FEEDBACK -->
+
+        <section class="feedback">
+
+            <h2>
+                📋 Personalized Feedback
+            </h2>
+
+            {% if feedback %}
+
+                <ul>
+
+                    {% for item in feedback %}
+
+                        <li>
+                            {{ item }}
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            {% else %}
+
+                <p>
+                    No feedback available.
+                </p>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- QUESTION RESULTS -->
+
+        <h2 style="margin-bottom: 18px;">
+            Question-wise Evaluation
+        </h2>
+
+
+        {% for result in results %}
+
+            <div class="question-card">
+
+                <div class="question-number">
+
+                    Question {{ loop.index }}
+
+                </div>
+
+
+                <div class="question">
+
+                    {{ result.question }}
+
+                </div>
+
+
+                <div class="answer">
+
+                    <div class="answer-title">
+                        Your Answer
+                    </div>
+
+                    {% if result.answer %}
+
+                        {{ result.answer }}
+
+                    {% else %}
+
+                        <em>
+                            No answer provided.
+                        </em>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="evaluation">
+
+                    <div class="evaluation-row">
+
+                        <strong>
+                            Score:
+                        </strong>
+
+                        {{ result.evaluation.score }}%
+
+                    </div>
+
+
+                    <div class="evaluation-row">
+
+                        <strong>
+                            Status:
+                        </strong>
+
+                        <span class="status">
+
+                            {{ result.evaluation.status }}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="evaluation-row matched">
+
+                        <strong>
+                            Matched Keywords:
+                        </strong>
+
+                        {% if result.evaluation.matched_keywords %}
+
+                            {{ result.evaluation.matched_keywords | join(", ") }}
+
+                        {% else %}
+
+                            None
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="evaluation-row missing">
+
+                        <strong>
+                            Missing Keywords:
+                        </strong>
+
+                        {% if result.evaluation.missing_keywords %}
+
+                            {{ result.evaluation.missing_keywords | join(", ") }}
+
+                        {% else %}
+
+                            None
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+
+        <!-- BUTTONS -->
+
+        <div class="buttons">
+
+            <a
+                href="{{ url_for('interview.mock_interview') }}"
+                class="btn"
+            >
+                🔄 Take Another Interview
+            </a>
+
+            <a
+                href="{{ url_for('dashboard.dashboard') }}"
+                class="btn secondary"
+            >
+                ← Back to Dashboard
+            </a>
+
+        </div>
+
+
+    </main>
+
+
+</body>
+
+</html>

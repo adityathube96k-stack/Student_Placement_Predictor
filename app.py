@@ -16,6 +16,7 @@ from routes.skill_gap_routes import skill_gap_bp
 from routes.recommendation_routes import recommendation_bp
 from routes.resume_routes import resume_bp
 from routes.company_routes import company_bp
+from routes.interview_routes import interview_bp
 
 
 app = Flask(__name__)
@@ -59,6 +60,10 @@ app.register_blueprint(
 
 app.register_blueprint(
     company_bp
+)
+
+app.register_blueprint(
+    interview_bp
 )
 
 

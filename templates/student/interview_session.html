@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Interview Session | Student Placement Predictor
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: #111827;
+            color: white;
+            padding: 18px 40px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            font-size: 21px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .header h1 {
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+        }
+
+        .question-card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-number {
+            color: #2563eb;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 130px;
+
+            padding: 14px;
+
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+
+            font-size: 15px;
+            font-family: Arial, sans-serif;
+
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .difficulty {
+            display: inline-block;
+
+            padding: 5px 10px;
+
+            background: #eef2ff;
+            color: #3730a3;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .submit-section {
+            background: white;
+            padding: 25px;
+
+            border-radius: 12px;
+
+            text-align: center;
+
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .submit-btn {
+            background: #2563eb;
+            color: white;
+
+            border: none;
+            border-radius: 8px;
+
+            padding: 13px 30px;
+
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .back-btn {
+            display: inline-block;
+
+            margin-top: 15px;
+
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+
+        .warning {
+            margin-top: 12px;
+            color: #b45309;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+
+            .navbar {
+                padding: 15px 20px;
+
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .container {
+                margin-top: 20px;
+            }
+
+            .question-card {
+                padding: 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <h2>
+            Student Placement Predictor
+        </h2>
+
+        <div>
+
+            <a
+                href="{{ url_for('dashboard.dashboard') }}"
+            >
+                Dashboard
+            </a>
+
+            <a
+                href="{{ url_for('auth.logout') }}"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- MAIN -->
+
+    <main class="container">
+
+
+        <!-- HEADER -->
+
+        <section class="header">
+
+            <h1>
+                🎤 {{ category }} Interview
+            </h1>
+
+            <p>
+                Answer each question carefully.
+                Your answers will be evaluated based on
+                relevant concepts and keywords.
+            </p>
+
+        </section>
+
+
+        <!-- QUESTIONS -->
+
+        <form
+            method="POST"
+            action="{{ url_for('interview.submit_interview') }}"
+        >
+
+            {% for question in questions %}
+
+                <div class="question-card">
+
+                    <div class="question-number">
+
+                        Question {{ loop.index }}
+
+                    </div>
+
+
+                    <span class="difficulty">
+
+                        {{ question.difficulty }}
+
+                    </span>
+
+
+                    <div class="question">
+
+                        {{ question.question }}
+
+                    </div>
+
+
+                    <textarea
+                        name="answer_{{ question.id }}"
+                        placeholder="Type your answer here..."
+                        required
+                    ></textarea>
+
+                </div>
+
+            {% endfor %}
+
+
+            <!-- SUBMIT -->
+
+            <div class="submit-section">
+
+                <button
+                    type="submit"
+                    class="submit-btn"
+                >
+                    Submit Interview
+                </button>
+
+                <p class="warning">
+
+                    Make sure you have answered all
+                    questions before submitting.
+
+                </p>
+
+                <a
+                    href="{{ url_for('interview.mock_interview') }}"
+                    class="back-btn"
+                >
+                    ← Back to Mock Interview
+                </a>
+
+            </div>
+
+        </form>
+
+
+    </main>
+
+
+</body>
+
+</html>
