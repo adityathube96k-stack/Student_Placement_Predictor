@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Interview History | Student Placement Predictor
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: #111827;
+            color: white;
+            padding: 18px 40px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            font-size: 21px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .header h1 {
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+        }
+
+        .history-card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 18px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .history-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(5, 1fr);
+
+            gap: 20px;
+
+            align-items: center;
+        }
+
+        .item span {
+            display: block;
+
+            color: #6b7280;
+
+            font-size: 13px;
+
+            margin-bottom: 6px;
+        }
+
+        .item strong {
+            font-size: 16px;
+        }
+
+        .score {
+            color: #2563eb;
+            font-size: 20px;
+        }
+
+        .status {
+            display: inline-block;
+
+            padding: 6px 12px;
+
+            border-radius: 20px;
+
+            background: #eef2ff;
+
+            color: #3730a3;
+
+            font-weight: bold;
+
+            font-size: 13px;
+        }
+
+        .date {
+            font-size: 14px;
+        }
+
+        .empty {
+            background: white;
+            padding: 40px;
+
+            border-radius: 12px;
+
+            text-align: center;
+
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .buttons {
+            text-align: center;
+
+            margin-top: 25px;
+        }
+
+        .btn {
+            display: inline-block;
+
+            padding: 12px 22px;
+
+            margin: 5px;
+
+            border-radius: 8px;
+
+            text-decoration: none;
+
+            color: white;
+
+            background: #2563eb;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn.secondary {
+            background: #374151;
+        }
+
+        .btn.secondary:hover {
+            background: #1f2937;
+        }
+
+        @media (max-width: 800px) {
+
+            .history-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 500px) {
+
+            .navbar {
+                padding: 15px 20px;
+
+                flex-direction: column;
+
+                gap: 10px;
+            }
+
+            .history-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <h2>
+            Student Placement Predictor
+        </h2>
+
+        <div>
+
+            <a
+                href="{{ url_for('dashboard.dashboard') }}"
+            >
+                Dashboard
+            </a>
+
+            <a
+                href="{{ url_for('auth.logout') }}"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- MAIN -->
+
+    <main class="container">
+
+
+        <!-- HEADER -->
+
+        <section class="header">
+
+            <h1>
+                🎤 Mock Interview History
+            </h1>
+
+            <p>
+                View your previous mock interview
+                attempts, scores and performance levels.
+            </p>
+
+        </section>
+
+
+        <!-- HISTORY -->
+
+        {% if history %}
+
+            {% for record in history %}
+
+                <div class="history-card">
+
+                    <div class="history-grid">
+
+
+                        <!-- CATEGORY -->
+
+                        <div class="item">
+
+                            <span>
+                                Category
+                            </span>
+
+                            <strong>
+                                {{ record.category }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- QUESTIONS -->
+
+                        <div class="item">
+
+                            <span>
+                                Questions
+                            </span>
+
+                            <strong>
+                                {{ record.total_questions }}
+                            </strong>
+
+                        </div>
+
+
+                        <!-- SCORE -->
+
+                        <div class="item">
+
+                            <span>
+                                Interview Score
+                            </span>
+
+                            <strong class="score">
+                                {{ record.interview_score }}%
+                            </strong>
+
+                        </div>
+
+
+                        <!-- PERFORMANCE -->
+
+                        <div class="item">
+
+                            <span>
+                                Performance
+                            </span>
+
+                            <span class="status">
+                                {{ record.performance_level }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- DATE -->
+
+                        <div class="item">
+
+                            <span>
+                                Date
+                            </span>
+
+                            <strong class="date">
+                                {{ record.created_at }}
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+
+                <h2>
+                    No Interview History
+                </h2>
+
+                <p style="margin-top: 10px; color: #6b7280;">
+                    Complete your first mock interview
+                    to see your results here.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- BUTTONS -->
+
+        <div class="buttons">
+
+            <a
+                href="{{ url_for('interview.mock_interview') }}"
+                class="btn"
+            >
+                🎤 Take Another Interview
+            </a>
+
+            <a
+                href="{{ url_for('dashboard.dashboard') }}"
+                class="btn secondary"
+            >
+                ← Back to Dashboard
+            </a>
+
+        </div>
+
+
+    </main>
+
+
+</body>
+
+</html>
