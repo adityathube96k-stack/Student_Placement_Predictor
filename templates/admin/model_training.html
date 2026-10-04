@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Model Training | Admin</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        /* ==============================
+           NAVBAR
+        ============================== */
+
+        .navbar {
+            height: 70px;
+            background: #111827;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 35px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .brand {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .brand span {
+            color: #60a5fa;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-badge {
+            background: #1e40af;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        .dashboard-btn {
+            text-decoration: none;
+            color: white;
+            background: #2563eb;
+            padding: 9px 16px;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .dashboard-btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* ==============================
+           MAIN CONTAINER
+        ============================== */
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .page-header p {
+            color: #6b7280;
+            font-size: 15px;
+        }
+
+        /* ==============================
+           TRAINING GRID
+        ============================== */
+
+        .training-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 0.7fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 28px;
+            box-shadow: 0 5px 20px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #111827;
+        }
+
+        .card-description {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        /* ==============================
+           DATASET INFO
+        ============================== */
+
+        .dataset-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 22px;
+        }
+
+        .dataset-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 9px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .dataset-row:last-child {
+            border-bottom: none;
+        }
+
+        .dataset-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .dataset-value {
+            font-weight: 600;
+            color: #111827;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        /* ==============================
+           TRAIN BUTTON
+        ============================== */
+
+        .train-form {
+            margin-top: 20px;
+        }
+
+        .train-btn {
+            width: 100%;
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .train-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* ==============================
+           INFO CARD
+        ============================== */
+
+        .info-list {
+            list-style: none;
+        }
+
+        .info-list li {
+            padding: 13px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-list strong {
+            color: #111827;
+        }
+
+        /* ==============================
+           RESULT SECTION
+        ============================== */
+
+        .result-card {
+            margin-top: 25px;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        .success-badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+
+        .result-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-box h3 {
+            font-size: 27px;
+            color: #2563eb;
+            margin-bottom: 7px;
+        }
+
+        .result-box p {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .training-date {
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* ==============================
+           FLASH MESSAGES
+        ============================== */
+
+        .flash-container {
+            margin-bottom: 25px;
+        }
+
+        .flash {
+            padding: 13px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .flash-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .flash-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .flash-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .flash-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* ==============================
+           WARNING
+        ============================== */
+
+        .warning-box {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 9px;
+            margin-top: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* ==============================
+           RESPONSIVE
+        ============================== */
+
+        @media (max-width: 900px) {
+
+            .training-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .navbar {
+                padding: 0 15px;
+            }
+
+            .brand {
+                font-size: 17px;
+            }
+
+            .admin-badge {
+                display: none;
+            }
+
+            .container {
+                margin-top: 25px;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==============================
+         NAVBAR
+    ============================== -->
+
+    <nav class="navbar">
+
+        <div class="brand">
+            Student <span>Placement Predictor</span>
+        </div>
+
+        <div class="nav-right">
+
+            <div class="admin-badge">
+                Administrator
+            </div>
+
+            <a
+                href="{{ url_for('admin.dashboard') }}"
+                class="dashboard-btn"
+            >
+                Dashboard
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- ==============================
+         MAIN
+    ============================== -->
+
+    <main class="container">
+
+        <div class="page-header">
+
+            <h1>
+                Model Training
+            </h1>
+
+            <p>
+                Train and update the placement prediction machine learning model
+                using the approved student placement dataset.
+            </p>
+
+        </div>
+
+
+        <!-- FLASH MESSAGES -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                <div class="flash-container">
+
+                    {% for category, message in messages %}
+
+                        <div class="flash flash-{{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- TRAINING CONTENT -->
+
+        <div class="training-grid">
+
+            <!-- DATASET CARD -->
+
+            <section class="card">
+
+                <h2>
+                    Training Dataset
+                </h2>
+
+                <p class="card-description">
+                    The model uses academic performance, attendance,
+                    aptitude, coding, communication and technical scores
+                    to learn placement outcomes.
+                </p>
+
+                <div class="dataset-box">
+
+                    <div class="dataset-row">
+
+                        <span class="dataset-label">
+                            Dataset
+                        </span>
+
+                        <span class="dataset-value">
+                            placement_dataset.csv
+                        </span>
+
+                    </div>
+
+                    <div class="dataset-row">
+
+                        <span class="dataset-label">
+                            Target Variable
+                        </span>
+
+                        <span class="dataset-value">
+                            placed
+                        </span>
+
+                    </div>
+
+                    <div class="dataset-row">
+
+                        <span class="dataset-label">
+                            Machine Learning Algorithm
+                        </span>
+
+                        <span class="dataset-value">
+                            Logistic Regression
+                        </span>
+
+                    </div>
+
+                    <div class="dataset-row">
+
+                        <span class="dataset-label">
+                            Feature Scaling
+                        </span>
+
+                        <span class="dataset-value">
+                            StandardScaler
+                        </span>
+
+                    </div>
+
+                    <div class="dataset-row">
+
+                        <span class="dataset-label">
+                            Train / Test Split
+                        </span>
+
+                        <span class="dataset-value">
+                            80% / 20%
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TRAIN BUTTON -->
+
+                <form
+                    method="POST"
+                    action="{{ url_for('admin.model_training') }}"
+                    class="train-form"
+                    onsubmit="return confirmTraining();"
+                >
+
+                    <button
+                        type="submit"
+                        class="train-btn"
+                    >
+                        🚀 Train Placement Prediction Model
+                    </button>
+
+                </form>
+
+
+                <div class="warning-box">
+
+                    <strong>Important:</strong>
+
+                    Training the model will replace the existing
+                    placement model and scaler with the newly trained
+                    versions.
+
+                </div>
+
+            </section>
+
+
+            <!-- MODEL INFORMATION -->
+
+            <section class="card">
+
+                <h2>
+                    Model Information
+                </h2>
+
+                <p class="card-description">
+                    Current training configuration used by the system.
+                </p>
+
+                <ul class="info-list">
+
+                    <li>
+                        <strong>Problem:</strong>
+                        Binary classification
+                    </li>
+
+                    <li>
+                        <strong>Output:</strong>
+                        Placed / Not Placed
+                    </li>
+
+                    <li>
+                        <strong>Probability:</strong>
+                        Placement probability
+                    </li>
+
+                    <li>
+                        <strong>Features:</strong>
+                        6 student attributes
+                    </li>
+
+                    <li>
+                        <strong>Model:</strong>
+                        Logistic Regression
+                    </li>
+
+                    <li>
+                        <strong>Scaler:</strong>
+                        StandardScaler
+                    </li>
+
+                </ul>
+
+            </section>
+
+        </div>
+
+
+        <!-- ==============================
+             TRAINING RESULT
+        ============================== -->
+
+        {% if training_success %}
+
+        <section class="card result-card">
+
+            <div class="result-header">
+
+                <div>
+
+                    <h2>
+                        Training Completed
+                    </h2>
+
+                    <p class="card-description">
+                        The placement prediction model has been
+                        successfully trained and saved.
+                    </p>
+
+                </div>
+
+                <div class="success-badge">
+                    Training Successful
+                </div>
+
+            </div>
+
+
+            <div class="result-grid">
+
+                <div class="result-box">
+
+                    <h3>
+                        {{ accuracy }}%
+                    </h3>
+
+                    <p>
+                        Test Accuracy
+                    </p>
+
+                </div>
+
+
+                <div class="result-box">
+
+                    <h3>
+                        {{ total_records }}
+                    </h3>
+
+                    <p>
+                        Total Records
+                    </p>
+
+                </div>
+
+
+                <div class="result-box">
+
+                    <h3>
+                        {{ training_records }}
+                    </h3>
+
+                    <p>
+                        Training Records
+                    </p>
+
+                </div>
+
+
+                <div class="result-box">
+
+                    <h3>
+                        {{ testing_records }}
+                    </h3>
+
+                    <p>
+                        Testing Records
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="training-date">
+
+                Model trained on:
+                <strong>
+                    {{ training_date }}
+                </strong>
+
+            </div>
+
+        </section>
+
+        {% endif %}
+
+    </main>
+
+
+    <script>
+
+        function confirmTraining() {
+
+            return confirm(
+                "Are you sure you want to train the placement prediction model?"
+            );
+
+        }
+
+    </script>
+
+</body>
+</html>

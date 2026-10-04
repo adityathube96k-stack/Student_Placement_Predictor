@@ -17,6 +17,8 @@ from routes.recommendation_routes import recommendation_bp
 from routes.resume_routes import resume_bp
 from routes.company_routes import company_bp
 from routes.interview_routes import interview_bp
+from routes.admin_routes import admin_bp
+from routes.tpo_routes import tpo_bp
 
 
 app = Flask(__name__)
@@ -64,6 +66,14 @@ app.register_blueprint(
 
 app.register_blueprint(
     interview_bp
+)
+
+app.register_blueprint(
+    admin_bp
+)
+
+app.register_blueprint(
+    tpo_bp
 )
 
 

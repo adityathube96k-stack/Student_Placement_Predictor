@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin Analytics | Student Placement Predictor</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family:
+                Inter,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background: #f4f7fb;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+
+            width: 245px;
+            height: 100vh;
+
+            background: #111827;
+            color: white;
+
+            padding: 25px 16px;
+
+            overflow-y: auto;
+        }
+
+        .brand {
+            padding: 5px 12px 28px;
+        }
+
+        .brand h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .brand p {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .nav-title {
+            font-size: 11px;
+            color: #6b7280;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            padding: 0 12px 10px;
+        }
+
+        .nav-link {
+            display: block;
+
+            text-decoration: none;
+
+            color: #d1d5db;
+
+            padding: 12px;
+
+            border-radius: 9px;
+
+            margin-bottom: 5px;
+
+            font-size: 14px;
+
+            transition: 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: 245px;
+
+            padding: 30px;
+
+            min-height: 100vh;
+        }
+
+        .topbar {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 28px;
+        }
+
+        .topbar h1 {
+            font-size: 28px;
+            color: #111827;
+        }
+
+        .topbar p {
+            margin-top: 5px;
+
+            font-size: 14px;
+
+            color: #6b7280;
+        }
+
+        .admin-badge {
+            background: white;
+
+            border: 1px solid #e5e7eb;
+
+            padding: 10px 16px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            color: #374151;
+        }
+
+        /* =========================
+           KPI CARDS
+        ========================= */
+
+        .stats-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            gap: 18px;
+
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+
+            border: 1px solid #e5e7eb;
+
+            border-radius: 15px;
+
+            padding: 21px;
+
+            box-shadow:
+                0 5px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        .stat-label {
+            color: #6b7280;
+
+            font-size: 13px;
+
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            color: #111827;
+
+            font-size: 29px;
+
+            font-weight: 700;
+        }
+
+        .stat-description {
+            margin-top: 7px;
+
+            color: #9ca3af;
+
+            font-size: 12px;
+        }
+
+        /* =========================
+           ANALYTICS GRID
+        ========================= */
+
+        .analytics-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 20px;
+
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: white;
+
+            border: 1px solid #e5e7eb;
+
+            border-radius: 15px;
+
+            padding: 23px;
+
+            box-shadow:
+                0 5px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        .panel-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 22px;
+        }
+
+        .panel-header h2 {
+            font-size: 17px;
+
+            color: #111827;
+        }
+
+        .panel-header span {
+            font-size: 12px;
+
+            color: #9ca3af;
+        }
+
+        /* =========================
+           PROGRESS
+        ========================= */
+
+        .metric {
+            margin-bottom: 18px;
+        }
+
+        .metric:last-child {
+            margin-bottom: 0;
+        }
+
+        .metric-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            margin-bottom: 7px;
+
+            font-size: 13px;
+        }
+
+        .metric-name {
+            color: #374151;
+        }
+
+        .metric-value {
+            font-weight: 700;
+
+            color: #111827;
+        }
+
+        .progress {
+            width: 100%;
+
+            height: 9px;
+
+            background: #eef2f7;
+
+            border-radius: 10px;
+
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+
+            width: var(--width);
+
+            background: #2563eb;
+
+            border-radius: 10px;
+        }
+
+        /* =========================
+           PLACEMENT STATUS
+        ========================= */
+
+        .placement-box {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 12px;
+        }
+
+        .placement-item {
+            background: #f8fafc;
+
+            border: 1px solid #e5e7eb;
+
+            border-radius: 11px;
+
+            padding: 18px;
+
+            text-align: center;
+        }
+
+        .placement-number {
+            display: block;
+
+            font-size: 25px;
+
+            font-weight: 700;
+
+            color: #111827;
+
+            margin-bottom: 5px;
+        }
+
+        .placement-label {
+            font-size: 12px;
+
+            color: #6b7280;
+        }
+
+        /* =========================
+           QUICK ACTIONS
+        ========================= */
+
+        .quick-actions {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 12px;
+        }
+
+        .action {
+            display: block;
+
+            text-decoration: none;
+
+            background: #f8fafc;
+
+            border: 1px solid #e5e7eb;
+
+            border-radius: 11px;
+
+            padding: 17px;
+
+            color: #374151;
+
+            transition: 0.2s ease;
+        }
+
+        .action:hover {
+            background: #eff6ff;
+
+            border-color: #bfdbfe;
+
+            transform: translateY(-2px);
+        }
+
+        .action-title {
+            font-size: 13px;
+
+            font-weight: 700;
+
+            margin-bottom: 5px;
+        }
+
+        .action-text {
+            font-size: 11px;
+
+            color: #6b7280;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+            text-align: center;
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+            margin-top: 25px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 1100px) {
+
+            .stats-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .quick-actions {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 800px) {
+
+            .sidebar {
+                position: static;
+
+                width: 100%;
+
+                height: auto;
+            }
+
+            .main {
+                margin-left: 0;
+
+                padding: 20px;
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .placement-box {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 550px) {
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <h2>
+                Placement AI
+            </h2>
+
+            <p>
+                Admin Control Center
+            </p>
+
+        </div>
+
+        <div class="nav-title">
+            Administration
+        </div>
+
+        <a
+            href="{{ url_for('admin.dashboard') }}"
+            class="nav-link"
+        >
+            🏠 Dashboard
+        </a>
+
+        <a
+            href="{{ url_for('admin.manage_students') }}"
+            class="nav-link"
+        >
+            👨‍🎓 Manage Students
+        </a>
+
+        <a
+            href="{{ url_for('admin.manage_companies') }}"
+            class="nav-link"
+        >
+            🏢 Manage Companies
+        </a>
+
+        <a
+            href="{{ url_for('admin.upload_dataset') }}"
+            class="nav-link"
+        >
+            📁 Upload Dataset
+        </a>
+
+        <a
+            href="{{ url_for('admin.model_training') }}"
+            class="nav-link"
+        >
+            🤖 Model Training
+        </a>
+
+        <a
+            href="{{ url_for('admin.analytics') }}"
+            class="nav-link active"
+        >
+            📊 Analytics
+        </a>
+
+        <a
+            href="{{ url_for('auth.logout') }}"
+            class="nav-link"
+        >
+            🚪 Logout
+        </a>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="main">
+
+        <div class="topbar">
+
+            <div>
+
+                <h1>
+                    Placement Analytics
+                </h1>
+
+                <p>
+                    Monitor student performance,
+                    placement readiness and prediction insights.
+                </p>
+
+            </div>
+
+            <div class="admin-badge">
+                👤 Administrator
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             KPI CARDS
+        ========================== -->
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total Students
+                </div>
+
+                <div class="stat-value">
+                    {{ total_students|default(0) }}
+                </div>
+
+                <div class="stat-description">
+                    Registered student profiles
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Average CGPA
+                </div>
+
+                <div class="stat-value">
+                    {{ average_cgpa|default(0)|round(2) }}
+                </div>
+
+                <div class="stat-description">
+                    Overall academic performance
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Average Attendance
+                </div>
+
+                <div class="stat-value">
+                    {{ average_attendance|default(0)|round(2) }}%
+                </div>
+
+                <div class="stat-description">
+                    Student attendance average
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Placement Rate
+                </div>
+
+                <div class="stat-value">
+                    {{ placement_rate|default(0)|round(2) }}%
+                </div>
+
+                <div class="stat-description">
+                    Based on prediction history
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             ANALYTICS PANELS
+        ========================== -->
+
+        <section class="analytics-grid">
+
+            <!-- Skill Performance -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <h2>
+                        Skill Performance
+                    </h2>
+
+                    <span>
+                        Average Score
+                    </span>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-header">
+
+                        <span class="metric-name">
+                            Aptitude
+                        </span>
+
+                        <span class="metric-value">
+                            {{ average_aptitude|default(0)|round(1) }}%
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar"
+                            style="
+                                --width:
+                                {{ average_aptitude|default(0) }}%;
+                            "
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-header">
+
+                        <span class="metric-name">
+                            Coding
+                        </span>
+
+                        <span class="metric-value">
+                            {{ average_coding|default(0)|round(1) }}%
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar"
+                            style="
+                                --width:
+                                {{ average_coding|default(0) }}%;
+                            "
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-header">
+
+                        <span class="metric-name">
+                            Communication
+                        </span>
+
+                        <span class="metric-value">
+                            {{ average_communication|default(0)|round(1) }}%
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar"
+                            style="
+                                --width:
+                                {{ average_communication|default(0) }}%;
+                            "
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-header">
+
+                        <span class="metric-name">
+                            Technical
+                        </span>
+
+                        <span class="metric-value">
+                            {{ average_technical|default(0)|round(1) }}%
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar"
+                            style="
+                                --width:
+                                {{ average_technical|default(0) }}%;
+                            "
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Placement Prediction -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <h2>
+                        Placement Predictions
+                    </h2>
+
+                    <span>
+                        Prediction History
+                    </span>
+
+                </div>
+
+
+                <div class="placement-box">
+
+                    <div class="placement-item">
+
+                        <span class="placement-number">
+                            {{ placed_count|default(0) }}
+                        </span>
+
+                        <span class="placement-label">
+                            Predicted Placed
+                        </span>
+
+                    </div>
+
+
+                    <div class="placement-item">
+
+                        <span class="placement-number">
+                            {{ not_placed_count|default(0) }}
+                        </span>
+
+                        <span class="placement-label">
+                            Predicted Not Placed
+                        </span>
+
+                    </div>
+
+
+                    <div class="placement-item">
+
+                        <span class="placement-number">
+                            {{ prediction_count|default(0) }}
+                        </span>
+
+                        <span class="placement-label">
+                            Total Predictions
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             READINESS
+        ========================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <h2>
+                    Placement Readiness
+                </h2>
+
+                <span>
+                    Student readiness overview
+                </span>
+
+            </div>
+
+
+            <div class="placement-box">
+
+                <div class="placement-item">
+
+                    <span class="placement-number">
+                        {{ excellent_count|default(0) }}
+                    </span>
+
+                    <span class="placement-label">
+                        Excellent
+                    </span>
+
+                </div>
+
+
+                <div class="placement-item">
+
+                    <span class="placement-number">
+                        {{ good_count|default(0) }}
+                    </span>
+
+                    <span class="placement-label">
+                        Good
+                    </span>
+
+                </div>
+
+
+                <div class="placement-item">
+
+                    <span class="placement-number">
+                        {{ moderate_count|default(0) }}
+                    </span>
+
+                    <span class="placement-label">
+                        Moderate
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             QUICK ACTIONS
+        ========================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <h2>
+                    Quick Actions
+                </h2>
+
+                <span>
+                    Administration tools
+                </span>
+
+            </div>
+
+
+            <div class="quick-actions">
+
+                <a
+                    href="{{ url_for('admin.manage_students') }}"
+                    class="action"
+                >
+
+                    <div class="action-title">
+                        👨‍🎓 Students
+                    </div>
+
+                    <div class="action-text">
+                        View and manage student records.
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('admin.manage_companies') }}"
+                    class="action"
+                >
+
+                    <div class="action-title">
+                        🏢 Companies
+                    </div>
+
+                    <div class="action-text">
+                        Manage placement company information.
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('admin.upload_dataset') }}"
+                    class="action"
+                >
+
+                    <div class="action-title">
+                        📁 Dataset
+                    </div>
+
+                    <div class="action-text">
+                        Upload new placement datasets.
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('admin.model_training') }}"
+                    class="action"
+                >
+
+                    <div class="action-title">
+                        🤖 Train Model
+                    </div>
+
+                    <div class="action-text">
+                        Train and update the ML model.
+                    </div>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <div class="footer">
+
+            Student Placement Predictor
+            • Admin Analytics
+
+        </div>
+
+    </main>
+
+</body>
+</html>

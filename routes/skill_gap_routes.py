@@ -25,20 +25,45 @@ skill_gap_bp = Blueprint(
 )
 def skill_gap():
 
+    # =====================================================
+    # AUTHENTICATION
+    # =====================================================
+
     if "user_id" not in session:
-        return redirect(
-            url_for("auth.login")
-        )
 
-    if session.get("role") != "student":
         flash(
-            "Access denied.",
-            "danger"
+            "Please login to access Skill Gap Analysis.",
+            "warning"
         )
 
         return redirect(
             url_for("auth.login")
         )
+
+
+    user_id = session["user_id"]
+
+
+    # =====================================================
+    # DEFAULT INPUTS
+    # =====================================================
+
+    inputs = {
+        "cgpa": "",
+        "attendance": "",
+        "aptitude_score": "",
+        "coding_score": "",
+        "communication_score": "",
+        "technical_score": ""
+    }
+
+
+    result = None
+
+
+    # =====================================================
+    # GET STUDENT PROFILE
+    # =====================================================
 
     connection = None
 
@@ -51,6 +76,8 @@ def skill_gap():
             cursor.execute(
                 """
                 SELECT
+                    cgpa,
+                    attendance,
                     aptitude_score,
                     coding_score,
                     communication_score,
@@ -58,223 +85,448 @@ def skill_gap():
                 FROM students
                 WHERE user_id = %s
                 """,
-                (
-                    session["user_id"],
-                )
+                (user_id,)
             )
 
             student = cursor.fetchone()
 
+
+        if student:
+
+            inputs = {
+                "cgpa": (
+                    student["cgpa"]
+                    if student["cgpa"] is not None
+                    else ""
+                ),
+
+                "attendance": (
+                    student["attendance"]
+                    if student["attendance"] is not None
+                    else ""
+                ),
+
+                "aptitude_score": (
+                    student["aptitude_score"]
+                    if student["aptitude_score"] is not None
+                    else ""
+                ),
+
+                "coding_score": (
+                    student["coding_score"]
+                    if student["coding_score"] is not None
+                    else ""
+                ),
+
+                "communication_score": (
+                    student["communication_score"]
+                    if student["communication_score"] is not None
+                    else ""
+                ),
+
+                "technical_score": (
+                    student["technical_score"]
+                    if student["technical_score"] is not None
+                    else ""
+                )
+            }
+
+
     except Exception as error:
 
         print(
-            "Skill Gap Database Error:",
+            "Skill Gap Profile Error:",
             error
-        )
-
-        flash(
-            "Unable to load student profile.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("dashboard.dashboard")
         )
 
     finally:
 
         if connection:
+
             connection.close()
 
-    if request.method == "GET":
 
-        inputs = {
-            "aptitude_score":
-                student["aptitude_score"]
-                if student and student["aptitude_score"] is not None
-                else "",
+    # =====================================================
+    # POST - ANALYZE SKILL GAP
+    # =====================================================
 
-            "coding_score":
-                student["coding_score"]
-                if student and student["coding_score"] is not None
-                else "",
-
-            "communication_score":
-                student["communication_score"]
-                if student and student["communication_score"] is not None
-                else "",
-
-            "technical_score":
-                student["technical_score"]
-                if student and student["technical_score"] is not None
-                else ""
-        }
-
-        return render_template(
-            "student/skill_gap.html",
-            inputs=inputs
-        )
-
-    try:
-
-        aptitude_score = float(
-            request.form.get(
-                "aptitude_score",
-                0
-            )
-        )
-
-        coding_score = float(
-            request.form.get(
-                "coding_score",
-                0
-            )
-        )
-
-        communication_score = float(
-            request.form.get(
-                "communication_score",
-                0
-            )
-        )
-
-        technical_score = float(
-            request.form.get(
-                "technical_score",
-                0
-            )
-        )
-
-        result = calculate_skill_gap(
-            aptitude_score=aptitude_score,
-            coding_score=coding_score,
-            communication_score=communication_score,
-            technical_score=technical_score
-        )
-
-        connection = None
+    if request.method == "POST":
 
         try:
 
-            connection = get_connection()
+            # -------------------------------------------------
+            # READ INPUTS
+            # -------------------------------------------------
 
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    """
-                    INSERT INTO skill_gap_history (
-                        user_id,
-                        aptitude_score,
-                        coding_score,
-                        communication_score,
-                        technical_score,
-                        total_gap,
-                        overall_status
-                    )
-                    VALUES (
-                        %s,
-                        %s,
-                        %s,
-                        %s,
-                        %s,
-                        %s,
-                        %s
-                    )
-                    """,
-                    (
-                        session["user_id"],
-                        aptitude_score,
-                        coding_score,
-                        communication_score,
-                        technical_score,
-                        result["total_gap"],
-                        result["overall_status"]
-                    )
+            cgpa = float(
+                request.form.get(
+                    "cgpa",
+                    0
                 )
-
-        except Exception as error:
-
-            print(
-                "Skill Gap History Error:",
-                error
             )
 
-            flash(
-                "Skill gap calculated, but history could not be saved.",
-                "warning"
+            attendance = float(
+                request.form.get(
+                    "attendance",
+                    0
+                )
             )
 
-        finally:
+            aptitude_score = float(
+                request.form.get(
+                    "aptitude_score",
+                    0
+                )
+            )
 
-            if connection:
-                connection.close()
+            coding_score = float(
+                request.form.get(
+                    "coding_score",
+                    0
+                )
+            )
 
-        return render_template(
-            "student/skill_gap.html",
-            result=result,
-            inputs={
+            communication_score = float(
+                request.form.get(
+                    "communication_score",
+                    0
+                )
+            )
+
+            technical_score = float(
+                request.form.get(
+                    "technical_score",
+                    0
+                )
+            )
+
+
+            # -------------------------------------------------
+            # STORE INPUTS FOR TEMPLATE
+            # -------------------------------------------------
+
+            inputs = {
+                "cgpa": cgpa,
+                "attendance": attendance,
                 "aptitude_score": aptitude_score,
                 "coding_score": coding_score,
                 "communication_score": communication_score,
                 "technical_score": technical_score
             }
-        )
 
-    except ValueError as error:
 
-        flash(
-            str(error),
-            "danger"
-        )
+            # -------------------------------------------------
+            # VALIDATION
+            # -------------------------------------------------
 
-        return redirect(
-            url_for(
-                "skill_gap.skill_gap"
+            if not 0 <= cgpa <= 10:
+
+                flash(
+                    "CGPA must be between 0 and 10.",
+                    "danger"
+                )
+
+                return render_template(
+                    "student/skill_gap.html",
+                    inputs=inputs,
+                    result=None
+                )
+
+
+            if not 0 <= attendance <= 100:
+
+                flash(
+                    "Attendance must be between 0 and 100.",
+                    "danger"
+                )
+
+                return render_template(
+                    "student/skill_gap.html",
+                    inputs=inputs,
+                    result=None
+                )
+
+
+            score_values = [
+                aptitude_score,
+                coding_score,
+                communication_score,
+                technical_score
+            ]
+
+
+            if any(
+                score < 0 or score > 100
+                for score in score_values
+            ):
+
+                flash(
+                    "Skill scores must be between 0 and 100.",
+                    "danger"
+                )
+
+                return render_template(
+                    "student/skill_gap.html",
+                    inputs=inputs,
+                    result=None
+                )
+
+
+            # -------------------------------------------------
+            # CALCULATE SKILL GAP
+            # -------------------------------------------------
+
+            result = calculate_skill_gap(
+                aptitude_score,
+                coding_score,
+                communication_score,
+                technical_score
             )
-        )
 
-    except Exception as error:
 
-        print(
-            "Skill Gap Route Error:",
-            error
-        )
+            # -------------------------------------------------
+            # ACADEMIC TARGETS
+            # -------------------------------------------------
 
-        flash(
-            "Unable to analyze skill gaps.",
-            "danger"
-        )
+            cgpa_target = 8.0
+            attendance_target = 75.0
 
-        return redirect(
-            url_for(
-                "skill_gap.skill_gap"
+
+            cgpa_gap = max(
+                0,
+                round(
+                    cgpa_target - cgpa,
+                    2
+                )
             )
-        )
 
 
-# ==========================================================
+            attendance_gap = max(
+                0,
+                round(
+                    attendance_target - attendance,
+                    2
+                )
+            )
+
+
+            # -------------------------------------------------
+            # ACADEMIC RESULT
+            # -------------------------------------------------
+
+            result["academic"] = {
+
+                "cgpa": round(
+                    cgpa,
+                    2
+                ),
+
+                "cgpa_target": cgpa_target,
+
+                "cgpa_gap": cgpa_gap,
+
+                "attendance": round(
+                    attendance,
+                    2
+                ),
+
+                "attendance_target": attendance_target,
+
+                "attendance_gap": attendance_gap
+            }
+
+
+            # -------------------------------------------------
+            # PRIORITY SKILLS
+            # -------------------------------------------------
+
+            priority_skills = list(
+                result.get(
+                    "priority_skills",
+                    []
+                )
+            )
+
+
+            if cgpa_gap > 0:
+
+                priority_skills.insert(
+                    0,
+                    "CGPA"
+                )
+
+
+            if attendance_gap > 0:
+
+                priority_skills.insert(
+                    1 if cgpa_gap > 0 else 0,
+                    "Attendance"
+                )
+
+
+            # Remove duplicates while
+            # preserving order
+
+            result["priority_skills"] = list(
+                dict.fromkeys(
+                    priority_skills
+                )
+            )
+
+
+            # -------------------------------------------------
+            # SAVE HISTORY
+            # -------------------------------------------------
+
+            connection = None
+
+            try:
+
+                connection = get_connection()
+
+                with connection.cursor() as cursor:
+
+                    cursor.execute(
+                        """
+                        INSERT INTO skill_gap_history
+                        (
+                            user_id,
+                            cgpa,
+                            attendance,
+                            aptitude_score,
+                            coding_score,
+                            communication_score,
+                            technical_score,
+                            total_gap,
+                            overall_status
+                        )
+                        VALUES
+                        (
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s
+                        )
+                        """,
+                        (
+                            user_id,
+                            cgpa,
+                            attendance,
+                            aptitude_score,
+                            coding_score,
+                            communication_score,
+                            technical_score,
+                            result["total_gap"],
+                            result["overall_status"]
+                        )
+                    )
+
+
+            except Exception as error:
+
+                print(
+                    "Skill Gap History Error:",
+                    error
+                )
+
+                flash(
+                    "Skill gap calculated, but history could not be saved.",
+                    "warning"
+                )
+
+            finally:
+
+                if connection:
+
+                    connection.close()
+
+
+            # -------------------------------------------------
+            # RENDER RESULT
+            # -------------------------------------------------
+
+            return render_template(
+                "student/skill_gap.html",
+                inputs=inputs,
+                result=result
+            )
+
+
+        except ValueError:
+
+            flash(
+                "Please enter valid numeric values.",
+                "danger"
+            )
+
+            return render_template(
+                "student/skill_gap.html",
+                inputs=inputs,
+                result=None
+            )
+
+
+        except Exception as error:
+
+            print(
+                "Skill Gap Error:",
+                error
+            )
+
+            flash(
+                "Unable to analyze skill gap. Please try again.",
+                "danger"
+            )
+
+            return render_template(
+                "student/skill_gap.html",
+                inputs=inputs,
+                result=None
+            )
+
+
+    # =====================================================
+    # GET REQUEST
+    # =====================================================
+
+    return render_template(
+        "student/skill_gap.html",
+        inputs=inputs,
+        result=result
+    )
+
+
+# =========================================================
 # SKILL GAP HISTORY
-# ==========================================================
+# =========================================================
 
 @skill_gap_bp.route(
     "/skill-gap-history"
 )
 def skill_gap_history():
 
+    # =====================================================
+    # AUTHENTICATION
+    # =====================================================
+
     if "user_id" not in session:
-        return redirect(
-            url_for("auth.login")
-        )
 
-    if session.get("role") != "student":
         flash(
-            "Access denied.",
-            "danger"
+            "Please login to view Skill Gap History.",
+            "warning"
         )
 
         return redirect(
             url_for("auth.login")
         )
+
+
+    user_id = session["user_id"]
 
     connection = None
 
@@ -288,6 +540,8 @@ def skill_gap_history():
                 """
                 SELECT
                     id,
+                    cgpa,
+                    attendance,
                     aptitude_score,
                     coding_score,
                     communication_score,
@@ -299,27 +553,27 @@ def skill_gap_history():
                 WHERE user_id = %s
                 ORDER BY created_at DESC
                 """,
-                (
-                    session["user_id"],
-                )
+                (user_id,)
             )
 
             history = cursor.fetchall()
+
 
         return render_template(
             "student/skill_gap_history.html",
             history=history
         )
 
+
     except Exception as error:
 
         print(
-            "Skill Gap History Route Error:",
+            "Skill Gap History Error:",
             error
         )
 
         flash(
-            "Unable to load skill gap history.",
+            "Unable to load Skill Gap History.",
             "danger"
         )
 
@@ -327,7 +581,9 @@ def skill_gap_history():
             url_for("dashboard.dashboard")
         )
 
+
     finally:
 
         if connection:
+
             connection.close()

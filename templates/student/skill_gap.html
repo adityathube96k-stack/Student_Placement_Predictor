@@ -74,6 +74,52 @@
         <form method="POST"
               action="{{ url_for('skill_gap.skill_gap') }}">
 
+            <!-- CGPA -->
+
+            <div class="form-group">
+
+                <label for="cgpa">
+                    CGPA
+                </label>
+
+                <input
+                    type="number"
+                    id="cgpa"
+                    name="cgpa"
+                    min="0"
+                    max="10"
+                    step="0.01"
+                    value="{{ inputs.cgpa|default('') }}"
+                    placeholder="Enter CGPA (0 - 10)"
+                    required
+                >
+
+            </div>
+
+
+            <!-- ATTENDANCE -->
+
+            <div class="form-group">
+
+                <label for="attendance">
+                    Attendance
+                </label>
+
+                <input
+                    type="number"
+                    id="attendance"
+                    name="attendance"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value="{{ inputs.attendance|default('') }}"
+                    placeholder="Enter attendance percentage"
+                    required
+                >
+
+            </div>
+
+
             <!-- APTITUDE -->
 
             <div class="form-group">
@@ -188,26 +234,177 @@
         <div class="skill-gap-result">
 
             <div class="skill-gap-status">
-
                 {{ result.overall_status }}
-
             </div>
-
 
             <div class="total-gap">
-
                 {{ result.total_gap }}
+            </div>
+
+            <div class="total-gap-label">
+                Total Skill Gap
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             ACADEMIC READINESS
+        ================================================== -->
+
+        {% if result.academic %}
+
+        <h2 class="skill-section-title">
+            Academic Readiness
+        </h2>
+
+
+        <div class="skill-grid">
+
+            <!-- CGPA -->
+
+            <div class="skill-card">
+
+                <div class="skill-name">
+                    CGPA
+                </div>
+
+
+                <div class="skill-details">
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Current
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {{ result.academic.cgpa }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Target
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {{ result.academic.cgpa_target }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Gap
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {{ result.academic.cgpa_gap }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Status
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {% if result.academic.cgpa_gap > 0 %}
+                                Needs Improvement
+                            {% else %}
+                                Strong
+                            {% endif %}
+                        </span>
+
+                    </div>
+
+                </div>
 
             </div>
 
 
-            <div class="total-gap-label">
+            <!-- ATTENDANCE -->
 
-                Total Skill Gap
+            <div class="skill-card">
+
+                <div class="skill-name">
+                    Attendance
+                </div>
+
+
+                <div class="skill-details">
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Current
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {{ result.academic.attendance }}%
+                        </span>
+
+                    </div>
+
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Target
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {{ result.academic.attendance_target }}%
+                        </span>
+
+                    </div>
+
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Gap
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {{ result.academic.attendance_gap }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="skill-detail">
+
+                        <span class="skill-detail-label">
+                            Status
+                        </span>
+
+                        <span class="skill-detail-value">
+                            {% if result.academic.attendance_gap > 0 %}
+                                Needs Improvement
+                            {% else %}
+                                Strong
+                            {% endif %}
+                        </span>
+
+                    </div>
+
+                </div>
 
             </div>
 
         </div>
+
+        {% endif %}
 
 
         <!-- =================================================
@@ -226,15 +423,11 @@
             <div class="skill-card">
 
                 <div class="skill-name">
-
                     {{ skill }}
-
                 </div>
 
 
                 <div class="skill-details">
-
-                    <!-- CURRENT SCORE -->
 
                     <div class="skill-detail">
 
@@ -249,8 +442,6 @@
                     </div>
 
 
-                    <!-- TARGET SCORE -->
-
                     <div class="skill-detail">
 
                         <span class="skill-detail-label">
@@ -264,8 +455,6 @@
                     </div>
 
 
-                    <!-- SKILL GAP -->
-
                     <div class="skill-detail">
 
                         <span class="skill-detail-label">
@@ -278,8 +467,6 @@
 
                     </div>
 
-
-                    <!-- STATUS -->
 
                     <div class="skill-detail">
 
@@ -318,7 +505,6 @@
                 <p>
                     Focus on improving:
                 </p>
-
 
                 <ul class="priority-list">
 

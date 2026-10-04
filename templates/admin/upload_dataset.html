@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Dataset Management | Student Placement Predictor
+    </title>
+
+
+    <!-- Main CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+
+    <!-- Dashboard CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/dashboard.css') }}"
+    >
+
+
+    <!-- Admin CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/admin.css') }}"
+    >
+
+
+    <style>
+
+        .dataset-page {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #6b7280;
+        }
+
+        .dataset-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .dataset-card h2 {
+            margin-bottom: 10px;
+        }
+
+        .dataset-card p {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .upload-box {
+            border: 2px dashed #2563eb;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: #f8fbff;
+        }
+
+        .upload-box input[type="file"] {
+            margin: 20px 0;
+            padding: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 11px 20px;
+            border-radius: 6px;
+            border: none;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn.primary {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .btn.primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn.secondary {
+            background: #6b7280;
+            color: #ffffff;
+        }
+
+        .btn.secondary:hover {
+            background: #4b5563;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .info-box {
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .info-box h3 {
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            margin: 0;
+        }
+
+        @media (max-width: 800px) {
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dataset-page {
+                width: 94%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     ADMIN NAVBAR
+===================================================== -->
+
+<nav class="dashboard-nav">
+
+    <div class="dashboard-logo">
+        Student Placement Predictor — Admin
+    </div>
+
+    <a
+        href="{{ url_for('auth.logout') }}"
+    >
+        Logout
+    </a>
+
+</nav>
+
+
+<!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+
+<main class="dataset-page">
+
+
+    <!-- PAGE HEADER -->
+
+    <section class="page-header">
+
+        <h1>
+            📁 Dataset Management
+        </h1>
+
+        <p>
+            Upload and manage placement datasets used by the
+            Student Placement Predictor ML system.
+        </p>
+
+    </section>
+
+
+    <!-- =================================================
+         UPLOAD DATASET
+    ================================================== -->
+
+    <section class="dataset-card">
+
+        <h2>
+            Upload Placement Dataset
+        </h2>
+
+        <p>
+            Upload a CSV dataset containing student academic,
+            technical and placement information.
+        </p>
+
+
+        <div class="upload-box">
+
+            <h3>
+                📂 Select CSV Dataset
+            </h3>
+
+            <p>
+                Supported format: CSV
+            </p>
+
+
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+                <input
+                    type="file"
+                    name="dataset"
+                    accept=".csv"
+                    required
+                >
+
+
+                <br>
+
+
+                <button
+                    type="submit"
+                    class="btn primary"
+                >
+                    Upload Dataset
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         DATASET INFORMATION
+    ================================================== -->
+
+    <section class="dataset-card">
+
+        <h2>
+            Dataset Requirements
+        </h2>
+
+        <p>
+            The placement prediction model currently expects
+            the following fields.
+        </p>
+
+
+        <div class="info-grid">
+
+
+            <div class="info-box">
+
+                <h3>
+                    🎓 Academic
+                </h3>
+
+                <p>
+                    CGPA and attendance
+                </p>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <h3>
+                    💻 Technical
+                </h3>
+
+                <p>
+                    Aptitude, coding and technical scores
+                </p>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <h3>
+                    🎯 Placement
+                </h3>
+
+                <p>
+                    Placement status
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         BACK TO DASHBOARD
+    ================================================== -->
+
+    <section>
+
+        <a
+            href="{{ url_for('admin.dashboard') }}"
+            class="btn secondary"
+        >
+            ← Back to Admin Dashboard
+        </a>
+
+    </section>
+
+
+</main>
+
+
+</body>
+
+</html>

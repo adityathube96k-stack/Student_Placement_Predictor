@@ -115,7 +115,6 @@ def profile():
 
     connection = None
 
-
     # ======================================================
     # UPDATE PROFILE
     # ======================================================
@@ -172,13 +171,10 @@ def profile():
             ""
         ).strip()
 
-        # NEW: STUDENT SKILLS
-
         skills = request.form.get(
             "skills",
             ""
         ).strip()
-
 
         # ==================================================
         # BASIC VALIDATION
@@ -195,7 +191,6 @@ def profile():
                 url_for("dashboard.profile")
             )
 
-
         if not branch:
 
             flash(
@@ -207,6 +202,163 @@ def profile():
                 url_for("dashboard.profile")
             )
 
+        if not year:
+
+            flash(
+                "Please select your year.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard.profile")
+            )
+
+        # ==================================================
+        # ACADEMIC VALIDATION
+        # ==================================================
+
+        if not cgpa:
+
+            flash(
+                "CGPA is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard.profile")
+            )
+
+        if not attendance:
+
+            flash(
+                "Attendance is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard.profile")
+            )
+
+        # ==================================================
+        # SKILL SCORE VALIDATION
+        # ==================================================
+
+        if not aptitude_score:
+
+            flash(
+                "Aptitude score is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard.profile")
+            )
+
+        if not coding_score:
+
+            flash(
+                "Coding score is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard.profile")
+            )
+
+        if not communication_score:
+
+            flash(
+                "Communication score is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard.profile")
+            )
+
+        if not technical_score:
+
+            flash(
+                "Technical score is required.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard.profile")
+            )
+
+        # ==================================================
+        # NUMERIC VALIDATION
+        # ==================================================
+
+        try:
+
+            cgpa_value = float(cgpa)
+            attendance_value = float(attendance)
+
+            aptitude_value = float(
+                aptitude_score
+            )
+
+            coding_value = float(
+                coding_score
+            )
+
+            communication_value = float(
+                communication_score
+            )
+
+            technical_value = float(
+                technical_score
+            )
+
+        except ValueError:
+
+            flash(
+                "Please enter valid numeric values for academic and skill scores.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard.profile")
+            )
+
+        # ==================================================
+        # RANGE VALIDATION
+        # ==================================================
+
+        if not 0 <= cgpa_value <= 10:
+
+            flash(
+                "CGPA must be between 0 and 10.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard.profile")
+            )
+
+        score_values = [
+            attendance_value,
+            aptitude_value,
+            coding_value,
+            communication_value,
+            technical_value
+        ]
+
+        if any(
+            score < 0 or score > 100
+            for score in score_values
+        ):
+
+            flash(
+                "Attendance and skill scores must be between 0 and 100.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard.profile")
+            )
 
         # ==================================================
         # SAVE PROFILE
@@ -223,7 +375,6 @@ def profile():
                     UPDATE students
 
                     SET
-
                         enrollment_no = %s,
                         phone = %s,
                         branch = %s,
@@ -243,25 +394,22 @@ def profile():
                     """,
 
                     (
-
                         enrollment_no,
                         phone,
                         branch,
+                        year,
 
-                        year or None,
+                        cgpa_value,
+                        attendance_value,
 
-                        cgpa or None,
-                        attendance or None,
-
-                        aptitude_score or None,
-                        coding_score or None,
-                        communication_score or None,
-                        technical_score or None,
+                        aptitude_value,
+                        coding_value,
+                        communication_value,
+                        technical_value,
 
                         skills or None,
 
                         session["user_id"]
-
                     )
                 )
 
@@ -275,7 +423,6 @@ def profile():
             return redirect(
                 url_for("dashboard.profile")
             )
-
 
         except Exception as error:
 
@@ -292,12 +439,10 @@ def profile():
                 "error"
             )
 
-
         finally:
 
             if connection:
                 connection.close()
-
 
     # ======================================================
     # LOAD PROFILE
@@ -312,7 +457,6 @@ def profile():
             cursor.execute(
                 """
                 SELECT
-
                     u.full_name,
                     u.email,
 
@@ -344,12 +488,10 @@ def profile():
 
             student = cursor.fetchone()
 
-
         return render_template(
             "student/profile.html",
             student=student
         )
-
 
     except Exception as error:
 
@@ -366,7 +508,6 @@ def profile():
         return redirect(
             url_for("dashboard.dashboard")
         )
-
 
     finally:
 

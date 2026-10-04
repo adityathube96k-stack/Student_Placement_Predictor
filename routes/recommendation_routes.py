@@ -33,6 +33,7 @@ def recommendations():
     # =================================================
 
     if "user_id" not in session:
+
         return redirect(
             url_for("auth.login")
         )
@@ -57,7 +58,7 @@ def recommendations():
     try:
 
         # =================================================
-        # CONNECT TO MYSQL
+        # DATABASE CONNECTION
         # =================================================
 
         connection = get_connection()
@@ -67,10 +68,13 @@ def recommendations():
             cursor.execute(
                 """
                 SELECT
+                    cgpa,
+                    attendance,
                     aptitude_score,
                     coding_score,
                     communication_score,
-                    technical_score
+                    technical_score,
+                    skills
                 FROM students
                 WHERE user_id = %s
                 """,
@@ -80,7 +84,7 @@ def recommendations():
             student = cursor.fetchone()
 
         # =================================================
-        # CHECK PROFILE
+        # PROFILE CHECK
         # =================================================
 
         if not student:
@@ -95,10 +99,12 @@ def recommendations():
             )
 
         # =================================================
-        # CHECK SCORES
+        # SCORE VALIDATION
         # =================================================
 
         required_scores = [
+            student["cgpa"],
+            student["attendance"],
             student["aptitude_score"],
             student["coding_score"],
             student["communication_score"],
@@ -111,7 +117,7 @@ def recommendations():
         ):
 
             flash(
-                "Please complete your skill scores in your profile first.",
+                "Please complete your academic and skill scores in your profile first.",
                 "warning"
             )
 
@@ -125,53 +131,83 @@ def recommendations():
 
         skill_gap_result = calculate_skill_gap(
 
-            aptitude_score=
-                student["aptitude_score"],
+            aptitude_score=float(
+                student["aptitude_score"]
+            ),
 
-            coding_score=
-                student["coding_score"],
+            coding_score=float(
+                student["coding_score"]
+            ),
 
-            communication_score=
-                student["communication_score"],
+            communication_score=float(
+                student["communication_score"]
+            ),
 
-            technical_score=
+            technical_score=float(
                 student["technical_score"]
-        )
-
-        # =================================================
-        # GENERATE RECOMMENDATIONS
-        # =================================================
-
-        recommendations = (
-            generate_skill_recommendations(
-                skill_gap_result["skills"]
             )
         )
 
         # =================================================
-        # DISPLAY PAGE
+        # GENERATE SKILL RECOMMENDATIONS
+        # =================================================
+
+        recommendations = generate_skill_recommendations(
+            skill_gap_result["skills"]
+        )
+
+        # =================================================
+        # STUDENT SKILLS
+        # =================================================
+
+        student_skills = student.get(
+            "skills"
+        )
+
+        if student_skills:
+
+            skill_list = [
+                skill.strip()
+                for skill in student_skills.split(",")
+                if skill.strip()
+            ]
+
+        else:
+
+            skill_list = []
+
+        # =================================================
+        # RENDER RECOMMENDATIONS PAGE
         # =================================================
 
         return render_template(
 
             "student/recommendations.html",
 
-            recommendations=
-                recommendations,
+            recommendations=recommendations,
 
-            skill_gap=
-                skill_gap_result
+            skill_gap=skill_gap_result,
+
+            student=student,
+
+            student_skills=skill_list
+
         )
 
     except Exception as error:
 
+        # =================================================
+        # ERROR LOG
+        # =================================================
+
         print(
             "Recommendation Route Error:",
-            error
+            repr(error)
         )
 
         flash(
-            "Unable to generate recommendations.",
+            "Unable to generate recommendations. "
+            "Please check the Flask terminal for the exact error.",
             "danger"
         )
 
@@ -182,4 +218,5 @@ def recommendations():
     finally:
 
         if connection:
+
             connection.close()
