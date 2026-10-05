@@ -5,7 +5,6 @@ from flask import (
 )
 
 from config import Config
-
 from database.db import test_connection
 
 from routes.auth_routes import auth_bp
@@ -19,62 +18,34 @@ from routes.company_routes import company_bp
 from routes.interview_routes import interview_bp
 from routes.admin_routes import admin_bp
 from routes.tpo_routes import tpo_bp
+from routes.report_routes import report_bp
 
+
+# =====================================================
+# FLASK APPLICATION
+# =====================================================
 
 app = Flask(__name__)
 
-app.config.from_object(
-    Config
-)
+app.config.from_object(Config)
 
 
 # =====================================================
-# REGISTER BLUEPRINTS
+# BLUEPRINT REGISTRATION
 # =====================================================
 
-app.register_blueprint(
-    auth_bp
-)
-
-app.register_blueprint(
-    dashboard_bp
-)
-
-app.register_blueprint(
-    prediction_bp
-)
-
-app.register_blueprint(
-    readiness_bp
-)
-
-app.register_blueprint(
-    skill_gap_bp
-)
-
-app.register_blueprint(
-    recommendation_bp
-)
-
-app.register_blueprint(
-    resume_bp
-)
-
-app.register_blueprint(
-    company_bp
-)
-
-app.register_blueprint(
-    interview_bp
-)
-
-app.register_blueprint(
-    admin_bp
-)
-
-app.register_blueprint(
-    tpo_bp
-)
+app.register_blueprint(auth_bp)
+app.register_blueprint(dashboard_bp)
+app.register_blueprint(prediction_bp)
+app.register_blueprint(readiness_bp)
+app.register_blueprint(skill_gap_bp)
+app.register_blueprint(recommendation_bp)
+app.register_blueprint(resume_bp)
+app.register_blueprint(company_bp)
+app.register_blueprint(interview_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(tpo_bp)
+app.register_blueprint(report_bp)
 
 
 # =====================================================
@@ -97,12 +68,11 @@ def home():
 def health():
 
     return jsonify({
-
         "status": "success",
-
-        "message":
-        "Student_Placement_Predictor backend is running"
-
+        "message": (
+            "Student_Placement_Predictor "
+            "backend is running"
+        )
     })
 
 
@@ -116,19 +86,17 @@ def db_test():
     connected, message = test_connection()
 
     return jsonify({
-
-        "database":
+        "database": (
             "connected"
             if connected
-            else "not_connected",
-
+            else "not_connected"
+        ),
         "message": message
-
     }), 200 if connected else 500
 
 
 # =====================================================
-# RUN APPLICATION
+# APPLICATION START
 # =====================================================
 
 if __name__ == "__main__":
