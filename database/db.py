@@ -1,4 +1,5 @@
 import pymysql
+
 from config import Config
 
 
@@ -14,27 +15,17 @@ def get_connection():
     )
 
 
-def test_connection():
-
-    connection = None
-
+def check_connection():
     try:
-
         connection = get_connection()
 
         with connection.cursor() as cursor:
-
             cursor.execute("SELECT 1 AS test")
+            cursor.fetchone()
 
-            result = cursor.fetchone()
+        connection.close()
 
         return True, "MySQL connection successful."
 
     except Exception as error:
-
         return False, str(error)
-
-    finally:
-
-        if connection:
-            connection.close()

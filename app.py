@@ -5,7 +5,7 @@ from flask import (
 )
 
 from config import Config
-from database.db import test_connection
+from database.db import check_connection
 
 from routes.auth_routes import auth_bp
 from routes.dashboard_routes import dashboard_bp
@@ -83,7 +83,7 @@ def health():
 @app.route("/db-test")
 def db_test():
 
-    connected, message = test_connection()
+    connected, message = check_connection()
 
     return jsonify({
         "database": (
