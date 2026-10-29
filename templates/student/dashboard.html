@@ -1,852 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, stat, dial, badge, chart, empty, meter %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+{% call page_head('Welcome back, ' ~ current_user.name.split()[0], 'Here is where you stand for this placement season.') %}
+  <a class="btn btn--secondary" href="{{ url_for('dashboard.profile') }}">{{ icon('edit') }} Update scores</a>
+  <a class="btn btn--primary" href="{{ url_for('prediction.prediction') }}">{{ icon('target') }} Run prediction</a>
+{% endcall %}
 
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Student Dashboard | Placement Predictor</title>
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/dashboard.css') }}"
-    >
-
-</head>
-
-
-<body>
-
-
-    <!-- ==================================================
-         NAVBAR
-    =================================================== -->
-
-    <nav class="navbar">
-
-        <div class="logo">
-            Student Placement Predictor
+<div class="grid grid--main">
+  <section class="panel-ink hero-card">
+    {% if overview.readiness %}
+      <div class="hero-card__dial">{{ dial(overview.readiness.readiness_score, 'Readiness', 'dial--lg', on_ink=True) }}</div>
+      <div class="hero-card__body">
+        <span class="badge badge--gold">{{ overview.readiness.readiness_level }}</span>
+        <h2>{% if overview.readiness.readiness_score >= 75 %}You are placement ready.{% elif overview.readiness.readiness_score >= 60 %}You are close. A few gaps remain.{% else %}Focus on the basics first.{% endif %}</h2>
+        <p class="muted">Readiness blends CGPA, attendance and four skill areas into one score out of 100.</p>
+        <div class="hero-card__facts">
+          <div><span class="muted text-sm">Placement probability</span><strong class="serif num">{% if overview.prediction %}{{ overview.prediction.placement_probability|num }}%{% else %}Not run{% endif %}</strong></div>
+          <div><span class="muted text-sm">Eligible companies</span><strong class="serif num">{{ eligible_count }}</strong></div>
+          <div><span class="muted text-sm">Profile complete</span><strong class="serif num">{{ overview.completeness }}%</strong></div>
         </div>
-
-        <div class="nav-links">
-
-            <a href="{{ url_for('dashboard.dashboard') }}">
-                Dashboard
-            </a>
-
-            <a href="{{ url_for('dashboard.profile') }}">
-                My Profile
-            </a>
-
-            <a href="{{ url_for('auth.logout') }}">
-                Logout
-            </a>
-
-        </div>
-
-    </nav>
-
-
-    <!-- ==================================================
-         MAIN CONTAINER
-    =================================================== -->
-
-    <main class="container">
-
-
-        <!-- ==================================================
-             WELCOME
-        =================================================== -->
-
-        <section class="welcome-card">
-
-            <h1>
-                Welcome, {{ student.full_name }} 👋
-            </h1>
-
-            <p>
-                Welcome to your Student Placement Intelligence
-                Dashboard.
-            </p>
-
-            <p>
-                Manage your profile, academic information and
-                placement preparation from one place.
-            </p>
-
-        </section>
-
-
-        <!-- ==================================================
-             PROFILE SUMMARY
-        =================================================== -->
-
-        <section class="section">
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2>
-                        Student Profile
-                    </h2>
-
-                    <p class="section-description">
-                        Your basic student information.
-                    </p>
-
-                </div>
-
-                <a
-                    href="{{ url_for('dashboard.profile') }}"
-                    class="btn"
-                >
-                    Edit Profile
-                </a>
-
-            </div>
-
-
-            <div class="profile-grid">
-
-
-                <div class="info-card">
-
-                    <h3>
-                        Full Name
-                    </h3>
-
-                    <p>
-                        {{ student.full_name }}
-                    </p>
-
-                </div>
-
-
-                <div class="info-card">
-
-                    <h3>
-                        Email
-                    </h3>
-
-                    <p>
-                        {{ student.email }}
-                    </p>
-
-                </div>
-
-
-                <div class="info-card">
-
-                    <h3>
-                        Enrollment Number
-                    </h3>
-
-                    <p>
-                        {{ student.enrollment_no or "Not Added" }}
-                    </p>
-
-                </div>
-
-
-                <div class="info-card">
-
-                    <h3>
-                        Phone
-                    </h3>
-
-                    <p>
-                        {{ student.phone or "Not Added" }}
-                    </p>
-
-                </div>
-
-
-                <div class="info-card">
-
-                    <h3>
-                        Branch
-                    </h3>
-
-                    <p>
-                        {{ student.branch or "Not Added" }}
-                    </p>
-
-                </div>
-
-
-                <div class="info-card">
-
-                    <h3>
-                        Academic Year
-                    </h3>
-
-                    <p>
-
-                        {% if student.year %}
-
-                            Year {{ student.year }}
-
-                        {% else %}
-
-                            Not Added
-
-                        {% endif %}
-
-                    </p>
-
-                </div>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- ==================================================
-             ACADEMIC & SKILL SCORES
-        =================================================== -->
-
-        <section class="section">
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2>
-                        Academic & Skill Scores
-                    </h2>
-
-                    <p class="section-description">
-                        Information used by the placement prediction
-                        system.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="score-grid">
-
-
-                <!-- CGPA -->
-
-                <div class="score-card">
-
-                    <span>
-                        CGPA
-                    </span>
-
-                    <strong>
-
-                        {% if student.cgpa is not none %}
-
-                            {{ student.cgpa }}
-
-                        {% else %}
-
-                            N/A
-
-                        {% endif %}
-
-                    </strong>
-
-                </div>
-
-
-                <!-- Attendance -->
-
-                <div class="score-card">
-
-                    <span>
-                        Attendance
-                    </span>
-
-                    <strong>
-
-                        {% if student.attendance is not none %}
-
-                            {{ student.attendance }}%
-
-                        {% else %}
-
-                            N/A
-
-                        {% endif %}
-
-                    </strong>
-
-                </div>
-
-
-                <!-- Aptitude -->
-
-                <div class="score-card">
-
-                    <span>
-                        Aptitude
-                    </span>
-
-                    <strong>
-
-                        {% if student.aptitude_score is not none %}
-
-                            {{ student.aptitude_score }}
-
-                        {% else %}
-
-                            N/A
-
-                        {% endif %}
-
-                    </strong>
-
-                </div>
-
-
-                <!-- Coding -->
-
-                <div class="score-card">
-
-                    <span>
-                        Coding
-                    </span>
-
-                    <strong>
-
-                        {% if student.coding_score is not none %}
-
-                            {{ student.coding_score }}
-
-                        {% else %}
-
-                            N/A
-
-                        {% endif %}
-
-                    </strong>
-
-                </div>
-
-
-                <!-- Communication -->
-
-                <div class="score-card">
-
-                    <span>
-                        Communication
-                    </span>
-
-                    <strong>
-
-                        {% if student.communication_score is not none %}
-
-                            {{ student.communication_score }}
-
-                        {% else %}
-
-                            N/A
-
-                        {% endif %}
-
-                    </strong>
-
-                </div>
-
-
-                <!-- Technical -->
-
-                <div class="score-card">
-
-                    <span>
-                        Technical
-                    </span>
-
-                    <strong>
-
-                        {% if student.technical_score is not none %}
-
-                            {{ student.technical_score }}
-
-                        {% else %}
-
-                            N/A
-
-                        {% endif %}
-
-                    </strong>
-
-                </div>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- ==================================================
-             PLACEMENT INTELLIGENCE
-        =================================================== -->
-
-        <section class="section">
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2>
-                        Placement Intelligence
-                    </h2>
-
-                    <p class="section-description">
-                        AI-powered tools for your placement preparation.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="feature-grid">
-
-
-                <!-- ==================================================
-                     PLACEMENT PREDICTION
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        🤖
-                    </div>
-
-                    <h3>
-                        Placement Prediction
-                    </h3>
-
-                    <p>
-                        Predict your placement status and
-                        placement probability using machine
-                        learning.
-                    </p>
-
-                    <a
-                        href="{{ url_for('prediction.prediction') }}"
-                        class="btn primary"
-                    >
-                        Predict Placement
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     PLACEMENT REPORT
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        📄
-                    </div>
-
-                    <h3>
-                        Placement Report
-                    </h3>
-
-                    <p>
-                        Download your personalized placement
-                        report containing your academic profile,
-                        prediction, readiness and skill-gap results.
-                    </p>
-
-                    <a
-                        href="{{ url_for('report.student_pdf') }}"
-                        class="btn primary"
-                    >
-                        Download Report
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     READINESS SCORE
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        📊
-                    </div>
-
-                    <h3>
-                        Placement Readiness
-                    </h3>
-
-                    <p>
-                        Calculate your overall placement
-                        preparation score.
-                    </p>
-
-                    <a
-                        href="{{ url_for('readiness.readiness_score') }}"
-                        class="btn primary"
-                    >
-                        Check Readiness
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     SKILL GAP
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        🎯
-                    </div>
-
-                    <h3>
-                        Skill Gap Analysis
-                    </h3>
-
-                    <p>
-                        Find the skills you need to improve
-                        for better placement opportunities.
-                    </p>
-
-                    <a
-                        href="{{ url_for('skill_gap.skill_gap') }}"
-                        class="btn primary"
-                    >
-                        Analyze Skill Gap
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     PERSONALIZED RECOMMENDATIONS
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        💡
-                    </div>
-
-                    <h3>
-                        Personalized Recommendations
-                    </h3>
-
-                    <p>
-                        Get personalized topics and actions
-                        based on your skill gaps.
-                    </p>
-
-                    <a
-                        href="{{ url_for('recommendation.recommendations') }}"
-                        class="btn primary"
-                    >
-                        View Recommendations
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     PREDICTION HISTORY
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        📋
-                    </div>
-
-                    <h3>
-                        Prediction History
-                    </h3>
-
-                    <p>
-                        View your previous placement predictions
-                        and placement probabilities.
-                    </p>
-
-                    <a
-                        href="{{ url_for('prediction.prediction_history') }}"
-                        class="btn primary"
-                    >
-                        View History
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     READINESS HISTORY
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        📈
-                    </div>
-
-                    <h3>
-                        Readiness History
-                    </h3>
-
-                    <p>
-                        View your previous placement readiness
-                        scores and readiness levels.
-                    </p>
-
-                    <a
-                        href="{{ url_for('readiness.readiness_history') }}"
-                        class="btn primary"
-                    >
-                        View History
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     SKILL GAP HISTORY
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        🎯
-                    </div>
-
-                    <h3>
-                        Skill Gap History
-                    </h3>
-
-                    <p>
-                        View your previous skill gap analysis
-                        and improvement status.
-                    </p>
-
-                    <a
-                        href="{{ url_for('skill_gap.skill_gap_history') }}"
-                        class="btn primary"
-                    >
-                        View History
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     RESUME ANALYZER
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        📄
-                    </div>
-
-                    <h3>
-                        Resume Analyzer
-                    </h3>
-
-                    <p>
-                        Upload your resume and get an automated
-                        resume score, skill analysis and
-                        personalized improvement suggestions.
-                    </p>
-
-                    <a
-                        href="{{ url_for('resume.resume_upload') }}"
-                        class="btn primary"
-                    >
-                        Analyze Resume
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     COMPANY ELIGIBILITY
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        🏢
-                    </div>
-
-                    <h3>
-                        Company Eligibility
-                    </h3>
-
-                    <p>
-                        Check which companies you are eligible for
-                        based on your academic and skill profile.
-                    </p>
-
-                    <a
-                        href="{{ url_for('company.company_eligibility') }}"
-                        class="btn primary"
-                    >
-                        Check Eligibility
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     COMPANY ELIGIBILITY HISTORY
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        📚
-                    </div>
-
-                    <h3>
-                        Company Eligibility History
-                    </h3>
-
-                    <p>
-                        View your previous company eligibility
-                        checks, missing requirements and skill gaps.
-                    </p>
-
-                    <a
-                        href="{{ url_for('company.company_eligibility_history') }}"
-                        class="btn primary"
-                    >
-                        View History
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     MOCK INTERVIEW
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        🎤
-                    </div>
-
-                    <h3>
-                        Mock Interview
-                    </h3>
-
-                    <p>
-                        Practice technical, programming, HR and
-                        behavioral interview questions and receive
-                        performance feedback.
-                    </p>
-
-                    <a
-                        href="{{ url_for('interview.mock_interview') }}"
-                        class="btn primary"
-                    >
-                        Start Mock Interview
-                    </a>
-
-                </div>
-
-
-                <!-- ==================================================
-                     INTERVIEW HISTORY
-                ================================================== -->
-
-                <div class="feature-card">
-
-                    <div class="feature-icon">
-                        📋
-                    </div>
-
-                    <h3>
-                        Interview History
-                    </h3>
-
-                    <p>
-                        View your previous mock interview attempts,
-                        scores and performance levels.
-                    </p>
-
-                    <a
-                        href="{{ url_for('interview.interview_history') }}"
-                        class="btn primary"
-                    >
-                        View Interview History
-                    </a>
-
-                </div>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- ==================================================
-             PROFILE ACTION
-        =================================================== -->
-
-        <section class="profile-action">
-
-            <h2>
-                Keep Your Profile Updated
-            </h2>
-
-            <p>
-                Your academic and skill information will be used
-                by the AI/ML placement prediction system.
-            </p>
-
-            <a
-                href="{{ url_for('dashboard.profile') }}"
-                class="btn primary"
-            >
-                Update My Profile
-            </a>
-
-        </section>
-
-
-    </main>
-
-
-    <!-- ==================================================
-         FOOTER
-    =================================================== -->
-
-    <footer class="footer">
-
-        <p>
-            © 2026 Student Placement Predictor
-        </p>
-
-        <p>
-            AI-Powered Career & Placement Intelligence System
-        </p>
-
-    </footer>
-
-
-</body>
-
-</html>
+      </div>
+    {% else %}
+      <div class="hero-card__body hero-card__body--solo">
+        <span class="badge badge--gold">Getting started</span>
+        <h2>Add your scores to unlock your readiness score.</h2>
+        <p class="muted">Your profile is {{ overview.completeness }}% complete. Enter CGPA, attendance and your four skill scores to see where you stand.</p>
+        <a class="btn btn--gold mt-4" href="{{ url_for('dashboard.profile') }}">Complete profile</a>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card__head"><div class="card__title">Next steps</div></div>
+    <ul class="list card__body" style="padding-top:var(--s-2);padding-bottom:var(--s-2)">
+      {% for step in next_steps %}
+      <li><span class="list-icon">{{ icon(step.icon) }}</span>
+        <div class="grow"><strong>{{ step.title }}</strong><div class="text-sm muted">{{ step.text }}</div></div>
+        <a class="icon-btn" href="{{ url_for(step.endpoint) }}" aria-label="{{ step.title }}">{{ icon('chevron-right') }}</a></li>
+      {% else %}
+      <li class="muted">You have completed every suggested step. Keep practising.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+
+<div class="stats mt-6">
+  {{ stat('Placement probability', (overview.prediction.placement_probability|num if overview.prediction else '-'), 'target', (overview.prediction.prediction if overview.prediction else 'Run a prediction'), '%' if overview.prediction else '') }}
+  {{ stat('Mock interview', (overview.interview.interview_score|num if overview.interview else '-'), 'mic', (overview.interview.performance_level if overview.interview else 'Not attempted yet'), '/100' if overview.interview else '') }}
+  {{ stat('Resume score', (overview.resume.overall_score|num if overview.resume else '-'), 'file', (overview.resume.rating if overview.resume else 'Upload your resume'), '/100' if overview.resume else '') }}
+  {{ stat('Applications', overview.applications, 'briefcase', overview.shortlisted ~ ' shortlisted or selected') }}
+</div>
+
+<div class="grid grid--main mt-6">
+  <section class="card">
+    <div class="card__head"><div><div class="card__title">Placement probability over time</div><div class="card__sub">From your saved predictions</div></div><a class="btn btn--ghost btn--sm" href="{{ url_for('analytics.student_analytics') }}">All analytics</a></div>
+    <div class="card__body">
+      {% if timeline.predictions|length > 1 %}
+        {{ chart({'type': 'line', 'labels': timeline.predictions|map(attribute='date')|list, 'series': [{'name': 'Placement probability', 'data': timeline.predictions|map(attribute='value')|list}], 'min': 0, 'max': 100, 'suffix': '%', 'height': 250}) }}
+      {% else %}
+        {{ empty('trending-up', 'Run two predictions to see a trend', 'Each saved prediction adds a point to this chart.', url_for('prediction.prediction'), 'Run prediction') }}
+      {% endif %}
+    </div>
+  </section>
+  <section class="card">
+    <div class="card__head"><div><div class="card__title">Skills against target</div><div class="card__sub">Current scores and hiring targets</div></div></div>
+    <div class="card__body">
+      {% if student and student.aptitude_score is not none %}
+        {{ chart({'type': 'radar', 'labels': radar.labels, 'series': [{'name': 'You', 'data': radar.current}, {'name': 'Target', 'data': radar.target, 'dashed': True, 'color': 'var(--chart-2)'}], 'max': 100}) }}
+      {% else %}{{ empty('layers', 'No skill scores yet', 'Add them in your profile.', url_for('dashboard.profile'), 'Open profile') }}{% endif %}
+    </div>
+  </section>
+</div>
+
+<div class="grid grid--2 mt-6">
+  <section class="card">
+    <div class="card__head"><div class="card__title">Companies you qualify for</div><a class="btn btn--ghost btn--sm" href="{{ url_for('company.company_eligibility') }}">See all</a></div>
+    {% if eligible_preview %}
+    <ul class="list card__body">
+      {% for r in eligible_preview %}
+      <li><span class="list-icon list-icon--success">{{ icon('building') }}</span><div class="grow"><strong>{{ r.company }}</strong><div class="text-sm muted">{{ r.industry or 'Company' }}{% if r.location %} in {{ r.location }}{% endif %}</div></div><span class="badge badge--gold">{{ r.package_lpa|num }} LPA</span></li>
+      {% endfor %}
+    </ul>
+    {% else %}{{ empty('building', 'No eligible companies yet', 'Improve your lowest scores or add missing skills to unlock more.', url_for('company.company_eligibility'), 'See requirements') }}{% endif %}
+  </section>
+  <section class="card">
+    <div class="card__head"><div class="card__title">Open placement drives</div><a class="btn btn--ghost btn--sm" href="{{ url_for('company.drives') }}">All drives</a></div>
+    {% if open_drives %}
+    <ul class="list card__body">
+      {% for d in open_drives %}
+      <li><span class="list-icon">{{ icon('calendar') }}</span><div class="grow"><strong>{{ d.company_name }}</strong><div class="text-sm muted">{{ d.job_role }} · {{ d.drive_date|fmt_date('%d %b') }}</div></div>{{ badge(d.status) }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}{{ empty('briefcase', 'No open drives right now', 'New drives appear here as soon as the placement cell posts them.') }}{% endif %}
+  </section>
+</div>
+{% endblock %}

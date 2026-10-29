@@ -1,0 +1,46 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, csrf, input, number, slider, select %}
+{% block title %}{{ 'Add student' if mode == 'new' else 'Edit student' }}{% endblock %}
+{% block crumbs %}<a class="crumb-parent" href="{{ url_for('admin.manage_students') }}">Students</a>{{ icon('chevron-right') }}<strong>{{ 'Add student' if mode == 'new' else 'Edit student' }}</strong>{% endblock %}
+{% block content %}
+{{ page_head('Add student' if mode == 'new' else 'Edit ' ~ student.get('full_name', 'student')) }}
+<form method="post" class="card" data-loading novalidate>
+  {{ csrf() }}
+  <section class="form-section"><h3>Account</h3>
+    <div class="form-grid" style="margin-top:var(--s-4)">
+      {{ input('full_name', 'Full name', student.get('full_name'), required=True) }}
+      {{ input('email', 'Email', student.get('email'), 'email', required=True) }}
+      {% if mode == 'new' %}{{ input('password', 'Temporary password', '', 'password', 'At least 8 characters with a letter and a number.', True, attrs='autocomplete="new-password"') }}{% endif %}
+      {{ input('phone', 'Phone', student.get('phone'), 'tel') }}
+      {{ input('enrollment_no', 'Enrollment number', student.get('enrollment_no')) }}
+    </div></section>
+  <section class="form-section"><h3>Academics</h3>
+    <div class="form-grid form-grid--3" style="margin-top:var(--s-4)">
+      {{ select('branch', 'Branch', branches, student.get('branch')) }}
+      {{ select('year', 'Year', years, student.get('year')) }}
+      {{ number('backlogs', 'Active backlogs', student.get('backlogs', 0), 0, 30, 1) }}
+      {{ number('cgpa', 'CGPA', student.get('cgpa'), 0, 10, 0.01) }}
+      {{ number('attendance', 'Attendance %', student.get('attendance'), 0, 100, 0.1) }}
+    </div></section>
+  <section class="form-section"><h3>Skill scores and experience</h3>
+    <div class="form-grid form-grid--3" style="margin-top:var(--s-4)">
+      {{ number('aptitude_score', 'Aptitude', student.get('aptitude_score')) }}
+      {{ number('coding_score', 'Coding', student.get('coding_score')) }}
+      {{ number('communication_score', 'Communication', student.get('communication_score')) }}
+      {{ number('technical_score', 'Technical', student.get('technical_score')) }}
+      {{ number('projects', 'Projects', student.get('projects', 0), 0, 50, 1) }}
+      {{ number('internships', 'Internships', student.get('internships', 0), 0, 20, 1) }}
+      {{ number('certifications', 'Certifications', student.get('certifications', 0), 0, 50, 1) }}
+    </div>
+    <div class="field mt-4"><label class="label" for="skills">Skills</label><textarea class="textarea" id="skills" name="skills" rows="2" placeholder="Python, SQL, React">{{ student.get('skills') or '' }}</textarea></div></section>
+  {% if mode == 'edit' %}
+  <section class="form-section"><h3>Placement status</h3>
+    <div class="form-grid form-grid--3" style="margin-top:var(--s-4)">
+      {{ select('placement_status', 'Status', ['Not Placed', 'In Process', 'Placed'], student.get('placement_status', 'Not Placed'), 'Select', True) }}
+      {{ input('placed_company', 'Company', student.get('placed_company')) }}
+      {{ number('package_lpa', 'Package (LPA)', student.get('package_lpa'), 0, 500, 0.1, required=False) }}
+    </div></section>
+  {% endif %}
+  <div class="form-actions"><a class="btn btn--ghost" href="{{ url_for('admin.manage_students') }}">Cancel</a><button class="btn btn--primary" type="submit">{{ icon('check') }} {{ 'Create student' if mode == 'new' else 'Save changes' }}</button></div>
+</form>
+{% endblock %}

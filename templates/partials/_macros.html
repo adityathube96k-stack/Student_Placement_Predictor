@@ -1,0 +1,117 @@
+{# Shared UI macros #}
+{% macro icon(name, cls='') -%}
+<svg class="icon {{ cls }}" aria-hidden="true" focusable="false"><use href="{{ url_for('static', filename='img/icons.svg') }}#i-{{ name }}"/></svg>
+{%- endmacro %}
+
+{% macro csrf() -%}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{%- endmacro %}
+
+{% macro page_head(title, subtitle='') %}
+<header class="page-head">
+  <div>
+    <h1>{{ title }}</h1>
+    {% if subtitle %}<p>{{ subtitle }}</p>{% endif %}
+  </div>
+  {% if caller %}<div class="page-head__actions">{{ caller() }}</div>{% endif %}
+</header>
+{% endmacro %}
+
+{% macro stat(label, value, icon_name='', note='', unit='', trend='') %}
+<div class="stat">
+  <div class="stat__label">{% if icon_name %}{{ icon(icon_name) }}{% endif %}{{ label }}</div>
+  <div class="stat__value num">{{ value }}{% if unit %}<small>{{ unit }}</small>{% endif %}</div>
+  {% if note %}<div class="stat__note {{ trend }}">{{ note }}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro dial(value, label='', size='', tone='', unit='%', on_ink=False) -%}
+{% set v = [[value|float, 0]|max, 100]|min %}
+{% set t = tone or ('high' if v >= 75 else ('mid' if v >= 50 else 'low')) %}
+<div class="dial dial--{{ t }} {{ size }} {{ 'dial--on-ink' if on_ink }}" style="--v: {{ v }}" role="img" aria-label="{{ label }} {{ v|round|int }}{{ unit }}">
+  <svg viewBox="0 0 200 200" aria-hidden="true">
+    {% for k in DIAL_TICKS %}<line class="dial__tick{{ ' dial__tick--major' if k.major }}" x1="{{ k.x1 }}" y1="{{ k.y1 }}" x2="{{ k.x2 }}" y2="{{ k.y2 }}"/>{% endfor %}
+    <circle class="dial__track" cx="100" cy="100" r="80"/>
+    <circle class="dial__fill" cx="100" cy="100" r="80"/>
+  </svg>
+  <div class="dial__center">
+    <div class="dial__value num">{{ v|round|int }}<small>{{ unit }}</small></div>
+    {% if label %}<div class="dial__label">{{ label }}</div>{% endif %}
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro status_kind(text) -%}
+{%- set m = {'Placed':'success','Selected':'success','Active':'success','Excellent':'success','Eligible':'success','High':'success','Strong':'success','Good':'info','Upcoming':'info','Applied':'info','Moderate':'warning','Average':'warning','In Process':'warning','Shortlisted':'gold','Needs Improvement':'danger','Rejected':'danger','Cancelled':'danger','Not Placed':'neutral','Completed':'neutral','Low':'danger','Not Eligible':'danger','Needs Work':'danger','Maintain':'success','Medium':'warning'} -%}
+{{ m.get(text, 'neutral') }}
+{%- endmacro %}
+
+{% macro badge(text, kind='', dot=False) -%}
+{%- set k = kind or status_kind(text)|trim -%}
+<span class="badge badge--{{ k }}{{ ' badge--dot' if dot }}">{{ text }}</span>
+{%- endmacro %}
+
+{% macro meter(value, kind='', target=None) -%}
+{% set v = [[value|float, 0]|max, 100]|min %}
+<div class="meter {{ 'meter--' ~ kind if kind }} {{ 'skill-bar' if target }}" role="progressbar" aria-valuenow="{{ v|round|int }}" aria-valuemin="0" aria-valuemax="100">
+  <span class="meter__fill" style="--v: {{ v }}"></span>{% if target %}<span class="skill-bar__target" style="--t: {{ target }}" title="Target {{ target }}"></span>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro empty(icon_name, title, text='', url='', label='') %}
+<div class="empty">
+  <div class="empty__icon">{{ icon(icon_name) }}</div>
+  <h3>{{ title }}</h3>
+  {% if text %}<p>{{ text }}</p>{% endif %}
+  {% if url %}<a class="btn btn--primary" href="{{ url }}">{{ label }}</a>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro chart(spec, height='') -%}
+<div class="chart" {% if height %}style="min-height: {{ height }}"{% endif %} data-chart='{{ spec|tojson }}'></div>
+{%- endmacro %}
+
+{% macro input(name, label, value='', type='text', hint='', required=False, placeholder='', attrs='', cls='') %}
+<div class="field {{ cls }}">
+  <label class="label" for="f-{{ name }}">{{ label }}{% if not required %}<span class="opt">Optional</span>{% endif %}</label>
+  <input class="input" id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ value if value is not none else '' }}" placeholder="{{ placeholder }}" {{ 'required' if required }} {{ attrs|safe }}>
+  {% if hint %}<span class="hint">{{ hint }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro number(name, label, value='', lo=0, hi=100, step=1, hint='', required=True, cls='') %}
+<div class="field {{ cls }}">
+  <label class="label" for="f-{{ name }}">{{ label }}</label>
+  <input class="input num" id="f-{{ name }}" name="{{ name }}" type="number" inputmode="decimal" min="{{ lo }}" max="{{ hi }}" step="{{ step }}" value="{{ value if value is not none else '' }}" {{ 'required' if required }}>
+  {% if hint %}<span class="hint">{{ hint }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro slider(name, label, value='', lo=0, hi=100, step=1, hint='') %}
+{% set val = value if value not in (none, '') else lo %}
+<div class="field">
+  <label class="label" for="f-{{ name }}">{{ label }}</label>
+  <div class="slider" data-slider>
+    <input type="range" min="{{ lo }}" max="{{ hi }}" step="{{ step }}" value="{{ val }}" aria-label="{{ label }} slider">
+    <input class="input num" id="f-{{ name }}" name="{{ name }}" type="number" inputmode="decimal" min="{{ lo }}" max="{{ hi }}" step="{{ step }}" value="{{ value if value is not none else '' }}" required>
+  </div>
+  {% if hint %}<span class="hint">{{ hint }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro select(name, label, options, selected='', placeholder='Select', required=False, cls='') %}
+<div class="field {{ cls }}">
+  <label class="label" for="f-{{ name }}">{{ label }}{% if not required %}<span class="opt">Optional</span>{% endif %}</label>
+  <select class="select" id="f-{{ name }}" name="{{ name }}" {{ 'required' if required }}>
+    <option value="">{{ placeholder }}</option>
+    {% for o in options %}<option value="{{ o }}" {{ 'selected' if o == selected }}>{{ o }}</option>{% endfor %}
+  </select>
+</div>
+{% endmacro %}
+
+{% macro confirm_form(action, message, label, kind='danger', icon_name='', title='Please confirm') %}
+<form method="post" action="{{ action }}" data-confirm="{{ message }}" data-confirm-title="{{ title }}" data-confirm-label="{{ label }}" class="inline-form">
+  {{ csrf() }}
+  <button class="btn btn--{{ kind }} btn--sm" type="submit">{% if icon_name %}{{ icon(icon_name) }}{% endif %}{{ label }}</button>
+</form>
+{% endmacro %}
+
+{% macro avatar(name) %}<span class="avatar" aria-hidden="true">{{ name|initials }}</span>{% endmacro %}

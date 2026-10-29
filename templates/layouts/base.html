@@ -1,0 +1,54 @@
+{% from "partials/_macros.html" import icon %}
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}Predict placement chances, close skill gaps and manage campus recruitment in one place.{% endblock %}">
+  <meta name="theme-color" content="#0c2535">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+  <script src="{{ url_for('static', filename='js/theme-init.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/print.css') }}" media="print">
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main">Skip to content</a>
+  {% block body %}{% endblock %}
+
+  <div class="toasts" role="region" aria-live="polite" aria-label="Notifications">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        {% set kind = 'danger' if category == 'error' else category %}
+        <div class="toast toast--{{ kind }}" role="status">
+          {{ icon({'success': 'check-circle', 'danger': 'x-circle', 'warning': 'alert'}.get(kind, 'info')) }}
+          <div class="toast__body">{{ message }}</div>
+          <button class="toast__close" type="button" aria-label="Dismiss">{{ icon('x', 'icon--sm') }}</button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <dialog class="modal" id="confirm-dialog" aria-labelledby="confirm-title">
+    <div class="modal__panel">
+      <h3 id="confirm-title">Please confirm</h3>
+      <p id="confirm-message"></p>
+      <div class="modal__actions">
+        <button class="btn btn--secondary" type="button" data-dialog-cancel>Cancel</button>
+        <button class="btn btn--danger" type="button" data-dialog-ok id="confirm-ok">Confirm</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/charts.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

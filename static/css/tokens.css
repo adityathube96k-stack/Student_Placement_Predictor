@@ -1,0 +1,143 @@
+/* ==========================================================================
+   Design tokens. Every colour, size and radius in the UI comes from here.
+   ========================================================================== */
+@font-face {
+  font-family: "Lora";
+  src: url("../fonts/lora-var.woff") format("woff");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg: #f3f6f7;
+  --surface: #ffffff;
+  --surface-2: #f7f9fa;
+  --surface-3: #edf2f4;
+  --line: #dce5e9;
+  --line-strong: #c3d0d6;
+  --overlay: rgba(8, 28, 40, 0.55);
+
+  /* Ink */
+  --ink: #0e2733;
+  --ink-2: #425b69;
+  --ink-3: #566f7d;
+  --ink-inverse: #ffffff;
+
+  /* Brand: campus navy-teal with gold */
+  --brand: #0f5f82;
+  --brand-hover: #0b4d6b;
+  --brand-soft: #e3f0f6;
+  --brand-ink: #0a4560;
+  --gold: #f0b429;
+  --gold-deep: #8f6200;
+  --gold-soft: #fdf3d7;
+
+  /* Navigation rail */
+  --rail: #0c2535;
+  --rail-2: #14364b;
+  --rail-line: rgba(255, 255, 255, 0.09);
+  --rail-ink: #b4c8d3;
+  --rail-ink-strong: #ffffff;
+
+  /* Status */
+  --success: #147a46;
+  --success-soft: #e2f5ea;
+  --warning: #915500;
+  --warning-soft: #fcefd3;
+  --danger: #bd2a3d;
+  --danger-soft: #fce8eb;
+  --info: var(--brand);
+  --info-soft: var(--brand-soft);
+
+  --focus: #2a8fc0;
+
+  /* Chart palette */
+  --chart-1: #0f5f82;
+  --chart-2: #e5a50a;
+  --chart-3: #2a9d8f;
+  --chart-4: #7d6bb0;
+  --chart-5: #e07a5f;
+  --chart-6: #8fa3ad;
+  --chart-grid: #e3eaee;
+  --chart-text: #566f7d;
+
+  /* Type */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-serif: "Lora", Georgia, "Times New Roman", serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+  --text-3xl: 2.5rem;
+
+  /* Space (4px grid) */
+  --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem; --s-5: 1.25rem;
+  --s-6: 1.5rem; --s-7: 2rem; --s-8: 2.5rem; --s-9: 3rem; --s-10: 4rem; --s-11: 6rem;
+
+  /* Shape */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  /* Elevation is reserved for things that float */
+  --shadow-pop: 0 14px 36px -10px rgba(8, 37, 53, 0.28), 0 2px 8px rgba(8, 37, 53, 0.08);
+  --shadow-sm: 0 1px 2px rgba(8, 37, 53, 0.06);
+
+  --rail-width: 17rem;
+  --topbar-height: 4rem;
+  --content-max: 78rem;
+  --ease: cubic-bezier(0.22, 0.7, 0.2, 1);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #08161f;
+  --surface: #0e2230;
+  --surface-2: #112a3a;
+  --surface-3: #163447;
+  --line: #1e3b4e;
+  --line-strong: #2b4d63;
+  --overlay: rgba(2, 10, 16, 0.7);
+
+  --ink: #e8f0f4;
+  --ink-2: #a9bec9;
+  --ink-3: #8aa2af;
+
+  --brand: #52b3de;
+  --brand-hover: #7cc6e8;
+  --brand-soft: rgba(82, 179, 222, 0.14);
+  --brand-ink: #9bd5ee;
+  --gold: #f2c14e;
+  --gold-deep: #f2c14e;
+  --gold-soft: rgba(242, 193, 78, 0.14);
+
+  --rail: #061219;
+  --rail-2: #0f2a3a;
+
+  --success: #4cc489;
+  --success-soft: rgba(76, 196, 137, 0.15);
+  --warning: #f0b45a;
+  --warning-soft: rgba(240, 180, 90, 0.15);
+  --danger: #f0768a;
+  --danger-soft: rgba(240, 118, 138, 0.15);
+
+  --focus: #6cc4ee;
+  --chart-1: #52b3de;
+  --chart-2: #f2c14e;
+  --chart-3: #4cc2b2;
+  --chart-4: #a999dc;
+  --chart-5: #f0987f;
+  --chart-6: #7f97a4;
+  --chart-grid: #1c3849;
+  --chart-text: #8aa2af;
+  --shadow-pop: 0 14px 36px -10px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3);
+}

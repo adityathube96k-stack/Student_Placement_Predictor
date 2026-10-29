@@ -1,511 +1,107 @@
+"""Company-wise eligibility: score thresholds, backlogs and required skills."""
 from company_eligibility.company_rules import get_all_companies
+from utils.helpers import split_skills
 
-
-# ==========================================================
-# NORMALIZE NUMBER
-# ==========================================================
 
 def to_float(value):
-    """
-    Convert Decimal, integer, string or float
-    into a normal Python float.
-    """
+    return 0.0 if value is None else float(value)
 
-    if value is None:
-        return 0.0
-
-    return float(value)
-
-
-# ==========================================================
-# NORMALIZE SKILLS
-# ==========================================================
 
 def normalize_skills(skills):
-    """
-    Convert student skills into a clean lowercase set.
-    """
-
-    if not skills:
-        return set()
-
     if isinstance(skills, str):
+        skills = split_skills(skills)
+    return {str(s).strip().lower() for s in (skills or []) if s and str(s).strip()}
 
-        skill_list = skills.split(",")
 
-    elif isinstance(skills, (list, tuple, set)):
+_SCORE_RULES = [
+    ("CGPA", "cgpa", "min_cgpa"),
+    ("Attendance", "attendance", "min_attendance"),
+    ("Aptitude Score", "aptitude_score", "min_aptitude"),
+    ("Coding Score", "coding_score", "min_coding"),
+    ("Communication Score", "communication_score", "min_communication"),
+    ("Technical Score", "technical_score", "min_technical"),
+]
 
-        skill_list = skills
 
-    else:
-
-        return set()
-
-    return {
-        str(skill).strip().lower()
-        for skill in skill_list
-        if skill and str(skill).strip()
+def check_eligibility(company, cgpa, attendance, aptitude_score, coding_score,
+                      communication_score, technical_score, student_skills=None, backlogs=0):
+    student = {
+        "cgpa": to_float(cgpa), "attendance": to_float(attendance),
+        "aptitude_score": to_float(aptitude_score), "coding_score": to_float(coding_score),
+        "communication_score": to_float(communication_score),
+        "technical_score": to_float(technical_score),
     }
-
-
-# ==========================================================
-# CHECK SINGLE COMPANY
-# ==========================================================
-
-def check_eligibility(
-    company,
-    cgpa,
-    attendance,
-    aptitude_score,
-    coding_score,
-    communication_score,
-    technical_score,
-    student_skills=None
-):
-
-    # ------------------------------------------------------
-    # CONVERT STUDENT VALUES TO FLOAT
-    # ------------------------------------------------------
-
-    cgpa = to_float(cgpa)
-
-    attendance = to_float(attendance)
-
-    aptitude_score = to_float(
-        aptitude_score
-    )
-
-    coding_score = to_float(
-        coding_score
-    )
-
-    communication_score = to_float(
-        communication_score
-    )
-
-    technical_score = to_float(
-        technical_score
-    )
-
-
-    # ------------------------------------------------------
-    # SCORE REQUIREMENTS
-    # ------------------------------------------------------
-
-    score_checks = [
-
-        (
-            "CGPA",
-            cgpa,
-            to_float(company["min_cgpa"])
-        ),
-
-        (
-            "Attendance",
-            attendance,
-            to_float(company["min_attendance"])
-        ),
-
-        (
-            "Aptitude Score",
-            aptitude_score,
-            to_float(company["min_aptitude"])
-        ),
-
-        (
-            "Coding Score",
-            coding_score,
-            to_float(company["min_coding"])
-        ),
-
-        (
-            "Communication Score",
-            communication_score,
-            to_float(company["min_communication"])
-        ),
-
-        (
-            "Technical Score",
-            technical_score,
-            to_float(company["min_technical"])
-        )
-
-    ]
-
-
-    missing_requirements = []
-
-
-    for requirement, student_score, required_score in score_checks:
-
-        if student_score < required_score:
-
+    missing_requirements, checks_total, checks_met = [], 0, 0
+    for label, key, rule in _SCORE_RULES:
+        required = to_float(company.get(rule))
+        checks_total += 1
+        if student[key] < required:
             missing_requirements.append({
+                "requirement": label, "student_score": round(student[key], 2),
+                "required_score": round(required, 2), "gap": round(required - student[key], 2)})
+        else:
+            checks_met += 1
 
-                "requirement": requirement,
+    max_backlogs = int(company.get("max_backlogs") or 0)
+    backlogs = int(backlogs or 0)
+    checks_total += 1
+    if backlogs > max_backlogs:
+        missing_requirements.append({
+            "requirement": "Active backlogs", "student_score": backlogs,
+            "required_score": max_backlogs, "gap": backlogs - max_backlogs})
+    else:
+        checks_met += 1
 
-                "student_score": round(
-                    student_score,
-                    2
-                ),
-
-                "required_score": round(
-                    required_score,
-                    2
-                ),
-
-                "gap": round(
-                    required_score - student_score,
-                    2
-                )
-
-            })
-
-
-    # ------------------------------------------------------
-    # SKILL REQUIREMENTS
-    # ------------------------------------------------------
-
-    required_skills = company.get(
-        "required_skills",
-        []
-    )
-
-
-    student_skill_set = normalize_skills(
-        student_skills
-    )
-
-
-    missing_skills = []
-
-
-    for required_skill in required_skills:
-
-        if (
-            str(required_skill).strip().lower()
-            not in student_skill_set
-        ):
-
-            missing_skills.append(
-                required_skill
-            )
-
-
-    # ------------------------------------------------------
-    # FINAL ELIGIBILITY
-    # ------------------------------------------------------
-
-    eligible = (
-
-        len(missing_requirements) == 0
-
-        and
-
-        len(missing_skills) == 0
-
-    )
-
-
-    # ------------------------------------------------------
-    # RESULT
-    # ------------------------------------------------------
+    required_skills = company.get("required_skills", []) or []
+    have = normalize_skills(student_skills)
+    missing_skills = [s for s in required_skills if str(s).strip().lower() not in have]
+    checks_total += len(required_skills)
+    checks_met += len(required_skills) - len(missing_skills)
 
     return {
-
-        "company": company["name"],
-
-        "eligible": eligible,
-
-        "missing_requirements":
-            missing_requirements,
-
-        "required_skills":
-            required_skills,
-
-        "missing_skills":
-            missing_skills
-
+        "company": company["name"], "company_id": company.get("id"),
+        "industry": company.get("industry"), "location": company.get("location"),
+        "package_lpa": company.get("package_lpa"),
+        "eligible": not missing_requirements and not missing_skills,
+        "match_percent": round(checks_met * 100 / checks_total) if checks_total else 100,
+        "missing_requirements": missing_requirements,
+        "required_skills": required_skills,
+        "missing_skills": missing_skills,
     }
 
 
-# ==========================================================
-# CHECK ALL COMPANIES
-# ==========================================================
-
-def check_all_companies(
-    cgpa,
-    attendance,
-    aptitude_score,
-    coding_score,
-    communication_score,
-    technical_score,
-    student_skills=None
-):
-
-    companies = get_all_companies()
-
+def check_all_companies(cgpa, attendance, aptitude_score, coding_score, communication_score,
+                        technical_score, student_skills=None, backlogs=0, companies=None):
     results = []
-
-
-    for company in companies:
-
+    for company in (companies if companies is not None else get_all_companies()):
         result = check_eligibility(
-
-            company=company,
-
-            cgpa=cgpa,
-
-            attendance=attendance,
-
-            aptitude_score=aptitude_score,
-
-            coding_score=coding_score,
-
-            communication_score=communication_score,
-
-            technical_score=technical_score,
-
-            student_skills=student_skills
-
-        )
-
-
-        # --------------------------------------------------
-        # ADD REQUIREMENTS FOR TEMPLATE
-        # --------------------------------------------------
-
+            company, cgpa, attendance, aptitude_score, coding_score,
+            communication_score, technical_score, student_skills, backlogs)
         result["requirements"] = {
-
-            "cgpa":
-                to_float(
-                    company["min_cgpa"]
-                ),
-
-            "attendance":
-                to_float(
-                    company["min_attendance"]
-                ),
-
-            "aptitude_score":
-                to_float(
-                    company["min_aptitude"]
-                ),
-
-            "coding_score":
-                to_float(
-                    company["min_coding"]
-                ),
-
-            "communication_score":
-                to_float(
-                    company["min_communication"]
-                ),
-
-            "technical_score":
-                to_float(
-                    company["min_technical"]
-                )
-
+            "cgpa": to_float(company.get("min_cgpa")),
+            "attendance": to_float(company.get("min_attendance")),
+            "aptitude_score": to_float(company.get("min_aptitude")),
+            "coding_score": to_float(company.get("min_coding")),
+            "communication_score": to_float(company.get("min_communication")),
+            "technical_score": to_float(company.get("min_technical")),
+            "max_backlogs": int(company.get("max_backlogs") or 0),
         }
-
-
         results.append(result)
-
-
+    results.sort(key=lambda r: (not r["eligible"], -r["match_percent"]))
     return results
 
 
-# ==========================================================
-# GET ELIGIBLE COMPANIES
-# ==========================================================
+def check_student(student, companies=None):
+    """Convenience wrapper taking a student row (dict)."""
+    return check_all_companies(
+        student["cgpa"], student["attendance"], student["aptitude_score"],
+        student["coding_score"], student["communication_score"], student["technical_score"],
+        student.get("skills"), student.get("backlogs") or 0, companies)
+
 
 def get_eligible_companies(results):
+    return [r for r in results if r["eligible"]]
 
-    return [
-
-        result
-
-        for result in results
-
-        if result["eligible"]
-
-    ]
-
-
-# ==========================================================
-# GET NON-ELIGIBLE COMPANIES
-# ==========================================================
 
 def get_non_eligible_companies(results):
-
-    return [
-
-        result
-
-        for result in results
-
-        if not result["eligible"]
-
-    ]
-
-
-# ==========================================================
-# DISPLAY RESULTS
-# ==========================================================
-
-def display_results(results):
-
-    print()
-
-    print("=" * 50)
-
-    print(
-        "COMPANY ELIGIBILITY RESULTS"
-    )
-
-    print("=" * 50)
-
-
-    for result in results:
-
-        print()
-
-        print(
-            "Company :",
-            result["company"]
-        )
-
-
-        if result["eligible"]:
-
-            print(
-                "Status  : Eligible"
-            )
-
-            print(
-                "✓ Student satisfies "
-                "all score and skill requirements."
-            )
-
-
-        else:
-
-            print(
-                "Status  : Not Eligible"
-            )
-
-
-            # ----------------------------------------------
-            # MISSING SCORE REQUIREMENTS
-            # ----------------------------------------------
-
-            if result[
-                "missing_requirements"
-            ]:
-
-                print(
-                    "Missing Requirements:"
-                )
-
-
-                for item in result[
-                    "missing_requirements"
-                ]:
-
-                    print(
-
-                        f"  - {item['requirement']}: "
-
-                        f"{item['student_score']} "
-
-                        f"(Required: "
-                        f"{item['required_score']}, "
-
-                        f"Gap: "
-                        f"{item['gap']})"
-
-                    )
-
-
-            # ----------------------------------------------
-            # MISSING SKILLS
-            # ----------------------------------------------
-
-            if result[
-                "missing_skills"
-            ]:
-
-                print(
-                    "Missing Skills:"
-                )
-
-
-                for skill in result[
-                    "missing_skills"
-                ]:
-
-                    print(
-                        f"  - {skill}"
-                    )
-
-
-    eligible_count = len(
-        get_eligible_companies(results)
-    )
-
-
-    not_eligible_count = len(
-        get_non_eligible_companies(results)
-    )
-
-
-    print()
-
-    print("=" * 50)
-
-    print(
-        f"Eligible Companies: "
-        f"{eligible_count}"
-    )
-
-    print(
-        f"Not Eligible Companies: "
-        f"{not_eligible_count}"
-    )
-
-    print("=" * 50)
-
-
-# ==========================================================
-# TEST
-# ==========================================================
-
-if __name__ == "__main__":
-
-    student_skills = (
-        "Python, SQL, Data Structures, "
-        "Git, HTML, CSS, JavaScript"
-    )
-
-
-    results = check_all_companies(
-
-        cgpa=7.8,
-
-        attendance=89.61,
-
-        aptitude_score=75.48,
-
-        coding_score=67.55,
-
-        communication_score=65.70,
-
-        technical_score=70.43,
-
-        student_skills=student_skills
-
-    )
-
-
-    display_results(results)
+    return [r for r in results if not r["eligible"]]

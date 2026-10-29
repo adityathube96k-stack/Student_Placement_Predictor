@@ -1,0 +1,13 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, badge, empty %}
+{% block title %}Resume history{% endblock %}
+{% block crumbs %}<a class="crumb-parent" href="{{ url_for('resume.resume_upload') }}">Resume analyzer</a>{{ icon('chevron-right') }}<strong>History</strong>{% endblock %}
+{% block content %}
+{% call page_head('Resume history', 'Every resume you have analysed.') %}<a class="btn btn--primary" href="{{ url_for('resume.resume_upload') }}">{{ icon('upload') }} Upload resume</a>{% endcall %}
+{% if history %}
+<section class="card"><div class="table-wrap"><table class="table">
+  <thead><tr><th>File</th><th>Date</th><th class="right">Score</th><th>Rating</th><th class="right">Words</th><th></th></tr></thead>
+  <tbody>{% for r in history %}<tr><td><strong>{{ r.original_filename }}</strong></td><td class="nowrap">{{ r.created_at|fmt_date('%d %b %Y, %H:%M') }}</td><td class="right num"><strong>{{ r.overall_score|num }}</strong></td><td>{{ badge(r.rating) }}</td><td class="right num">{{ r.word_count }}</td>
+    <td class="right"><a class="btn btn--ghost btn--sm" href="{{ url_for('resume.resume_result', analysis_id=r.id) }}">View</a></td></tr>{% endfor %}</tbody></table></div></section>
+{% else %}<section class="card">{{ empty('file', 'No resumes analysed', 'Upload a PDF to get your first score.', url_for('resume.resume_upload'), 'Upload resume') }}</section>{% endif %}
+{% endblock %}

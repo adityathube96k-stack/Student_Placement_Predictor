@@ -1,0 +1,110 @@
+{
+  "version": "v20261029-164840",
+  "algorithm": "Logistic Regression",
+  "trained_at": "2026-10-29 16:48:40",
+  "trained_by": 1,
+  "sklearn_version": "1.9.1",
+  "features": [
+    "cgpa",
+    "attendance",
+    "aptitude_score",
+    "coding_score",
+    "communication_score",
+    "technical_score",
+    "projects",
+    "internships",
+    "certifications"
+  ],
+  "feature_medians": {
+    "cgpa": 6.9,
+    "attendance": 76.0,
+    "aptitude_score": 67.0,
+    "coding_score": 70.0,
+    "communication_score": 69.0,
+    "technical_score": 71.0,
+    "projects": 2.0,
+    "internships": 1.0,
+    "certifications": 1.0
+  },
+  "rows": 1193,
+  "train_rows": 954,
+  "test_rows": 239,
+  "placed_rate": 55.74,
+  "metrics": {
+    "accuracy": 92.47,
+    "precision": 92.59,
+    "recall": 93.98,
+    "f1": 93.28,
+    "roc_auc": 97.8
+  },
+  "confusion_matrix": {
+    "tn": 96,
+    "fp": 10,
+    "fn": 8,
+    "tp": 125
+  },
+  "comparison": [
+    {
+      "algorithm": "Logistic Regression",
+      "cv_f1": 88.91,
+      "cv_std": 0.9
+    },
+    {
+      "algorithm": "Random Forest",
+      "cv_f1": 89.14,
+      "cv_std": 0.8
+    },
+    {
+      "algorithm": "Gradient Boosting",
+      "cv_f1": 89.1,
+      "cv_std": 0.15
+    }
+  ],
+  "importances": [
+    {
+      "feature": "cgpa",
+      "label": "CGPA",
+      "importance": 0.0428
+    },
+    {
+      "feature": "internships",
+      "label": "Internships",
+      "importance": 0.0363
+    },
+    {
+      "feature": "coding_score",
+      "label": "Coding",
+      "importance": 0.0182
+    },
+    {
+      "feature": "projects",
+      "label": "Projects",
+      "importance": 0.0067
+    },
+    {
+      "feature": "technical_score",
+      "label": "Technical",
+      "importance": 0.0059
+    },
+    {
+      "feature": "certifications",
+      "label": "Certifications",
+      "importance": 0.0054
+    },
+    {
+      "feature": "aptitude_score",
+      "label": "Aptitude",
+      "importance": 0.0047
+    },
+    {
+      "feature": "attendance",
+      "label": "Attendance",
+      "importance": 0.0009
+    },
+    {
+      "feature": "communication_score",
+      "label": "Communication",
+      "importance": -0.0041
+    }
+  ]
+}

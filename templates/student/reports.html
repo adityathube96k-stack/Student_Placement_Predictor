@@ -1,0 +1,23 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, empty %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+{{ page_head('Reports', 'Download your placement report and activity history.') }}
+<div class="grid grid--2">
+  <article class="card"><div class="card__body stack">
+    <span class="list-icon list-icon--danger">{{ icon('file') }}</span>
+    <div><h3 style="font-size:var(--text-md)">Placement report (PDF)</h3><p class="muted mt-2">A formatted summary of your profile, latest prediction, readiness, skill gap, resume score and recommendations. Share it with your placement officer or mentor.</p></div>
+    <div><a class="btn btn--primary" href="{{ url_for('report.student_pdf') }}">{{ icon('download') }} Download PDF</a></div>
+  </div></article>
+  <article class="card"><div class="card__body stack">
+    <span class="list-icon list-icon--success">{{ icon('bar-chart') }}</span>
+    <div><h3 style="font-size:var(--text-md)">Activity history (Excel)</h3><p class="muted mt-2">Every prediction, readiness calculation and mock interview with dates and scores, in separate sheets.</p></div>
+    <div><a class="btn btn--secondary" href="{{ url_for('report.student_history_xlsx') }}">{{ icon('download') }} Download Excel</a></div>
+  </div></article>
+</div>
+<h2 class="section-title">Recent downloads</h2>
+<section class="card">
+  {% if recent %}<ul class="list card__body">{% for r in recent %}<li><span class="list-icon">{{ icon('download') }}</span><div class="grow"><strong>{{ r.report_type|replace('_', ' ')|capitalize }}</strong></div><span class="badge">{{ r.file_format|upper }}</span><span class="text-sm muted">{{ r.created_at|time_ago }}</span></li>{% endfor %}</ul>
+  {% else %}{{ empty('download', 'No downloads yet', 'Reports you generate will be listed here.') }}{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, meter %}
+{% block title %}Career roadmap{% endblock %}
+{% block content %}
+{% call page_head('Your six-month roadmap', roadmap.summary) %}
+  <a class="btn btn--secondary" href="{{ url_for('recommendation.recommendations') }}">{{ icon('zap') }} Recommendations</a>
+{% endcall %}
+<div class="grid grid--main">
+  <section class="card"><div class="card__body">
+    <div class="timeline">
+      {% for m in roadmap.months %}
+      <div class="timeline__item {{ 'is-last' if loop.last }}">
+        <span class="timeline__dot">{{ m.month }}</span>
+        <div class="row between row--wrap"><h3 style="font-size:var(--text-md)">Month {{ m.month }}: {{ m.title }}</h3><span class="badge">{{ m.hours }} hours</span></div>
+        <ul class="checks mt-2">{% for g in m.goals %}<li>{{ icon('check-circle') }}<span>{{ g }}</span></li>{% endfor %}</ul>
+        <div class="milestone">{{ icon('flag', 'icon--sm') }}<span>{{ m.milestone }}</span></div>
+      </div>{% endfor %}
+    </div>
+  </div></section>
+  <aside class="stack">
+    <section class="card"><div class="card__head"><div class="card__title">Target roles</div></div>
+      <ul class="list card__body">{% for r in roadmap.target_roles %}
+        <li><div class="grow"><strong>{{ r.role }}</strong><div class="text-sm muted">{{ r.matched|join(', ')|title if r.matched else 'No matching skills yet' }}</div></div><strong class="num">{{ r.match }}%</strong></li>{% endfor %}</ul></section>
+    <section class="card"><div class="card__head"><div class="card__title">Focus order</div></div>
+      <div class="card__body stack">{% for s in roadmap.priority_order %}
+        <div class="row"><span class="badge {{ 'badge--gold' if loop.first }}">{{ loop.index }}</span><span>{{ s }}</span><span class="grow"></span><span class="num muted">{{ skill_gap.skills[s].current_score|num }} / {{ skill_gap.skills[s].target_score }}</span></div>{% endfor %}</div></section>
+  </aside>
+</div>
+{% endblock %}

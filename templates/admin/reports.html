@@ -1,0 +1,18 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, empty %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+{{ page_head('Reports and exports', 'Download institute data for audits, accreditation or further analysis.') }}
+<div class="grid grid--2">
+  {% for icon_name, tone, title, text, url, label in [
+    ('users', '', 'Student records', 'Every student with scores, skills, placement status and package.', url_for('report.students_xlsx'), 'Excel (.xlsx)'),
+    ('users', '', 'Student records (CSV)', 'The same data as a flat CSV for spreadsheets and BI tools.', url_for('report.students_csv'), 'CSV'),
+    ('target', 'gold', 'Prediction log', 'All saved predictions with inputs, probability and model version.', url_for('report.predictions_xlsx'), 'Excel (.xlsx)'),
+    ('bar-chart', 'success', 'Placement summary', 'Placed students, branch summary, eligibility by company and application funnel.', url_for('report.placements_xlsx'), 'Excel (.xlsx)'),
+    ('building', '', 'Company criteria', 'All companies with their eligibility rules and required skills.', url_for('report.companies_xlsx'), 'Excel (.xlsx)')] %}
+  <article class="card"><div class="card__body row" style="align-items:flex-start"><span class="list-icon {{ 'list-icon--' ~ tone if tone }}">{{ icon(icon_name) }}</span><div class="grow"><h3 style="font-size:var(--text-md)">{{ title }}</h3><p class="muted text-sm mt-2">{{ text }}</p></div><a class="btn btn--secondary btn--sm" href="{{ url }}">{{ icon('download') }} {{ label }}</a></div></article>
+  {% endfor %}
+</div>
+<h2 class="section-title">Recent exports</h2>
+<section class="card">{% if recent %}<ul class="list card__body">{% for r in recent %}<li><span class="list-icon">{{ icon('download') }}</span><div class="grow"><strong>{{ r.report_type|replace('_', ' ')|capitalize }}</strong><div class="text-sm muted">{{ r.full_name or 'Unknown' }}</div></div><span class="badge">{{ r.file_format|upper }}</span><span class="text-sm muted">{{ r.created_at|time_ago }}</span></li>{% endfor %}</ul>{% else %}{{ empty('download', 'No exports yet', 'Exports you generate will be logged here.') }}{% endif %}</section>
+{% endblock %}

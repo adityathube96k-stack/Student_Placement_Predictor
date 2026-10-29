@@ -1,283 +1,53 @@
-# ==========================================================
-# STUDENT PLACEMENT PREDICTOR
-# ML PREDICTION ENGINE
-# ==========================================================
-
-import os
-import joblib
+"""Placement prediction with per-feature explanations."""
 import pandas as pd
 
-
-# ==========================================================
-# PATH CONFIGURATION
-# ==========================================================
-
-BASE_DIR = os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
-)
-
-MODEL_PATH = os.path.join(
-    BASE_DIR,
-    "ml",
-    "models",
-    "placement_model.pkl"
-)
-
-SCALER_PATH = os.path.join(
-    BASE_DIR,
-    "ml",
-    "models",
-    "scaler.pkl"
-)
+from ml.feature_engineering import FEATURE_LABELS, validate_inputs
+from ml.model_loader import load_model
 
 
-# ==========================================================
-# LOAD MODEL
-# ==========================================================
+def predict_placement(cgpa, attendance, aptitude_score, coding_score,
+                      communication_score, technical_score,
+                      projects=None, internships=None, certifications=None):
+    values = validate_inputs({
+        "cgpa": cgpa, "attendance": attendance, "aptitude_score": aptitude_score,
+        "coding_score": coding_score, "communication_score": communication_score,
+        "technical_score": technical_score, "projects": projects,
+        "internships": internships, "certifications": certifications,
+    })
+    pipeline, meta = load_model()
+    features = meta["features"]
+    # One batched call: row 0 is the student; the rest swap a single feature for the
+    # median (typical) value. The probability change is that feature's contribution.
+    used = [f for f in features if f in values]
+    rows = [[values.get(f) for f in features]]
+    for feature in used:
+        row = [values.get(f) for f in features]
+        row[features.index(feature)] = meta["feature_medians"][feature]
+        rows.append(row)
+    probs = pipeline.predict_proba(pd.DataFrame(rows, columns=features, dtype=float))[:, 1]
+    probability = float(probs[0])
+    factors = [{"feature": f, "label": FEATURE_LABELS[f],
+                "impact": round((probability - float(probs[i + 1])) * 100, 1)}
+               for i, f in enumerate(used)]
+    factors.sort(key=lambda item: abs(item["impact"]), reverse=True)
 
-def load_model():
-
-    if not os.path.exists(MODEL_PATH):
-
-        raise FileNotFoundError(
-            "Placement model not found. "
-            "Please train the model first."
-        )
-
-    return joblib.load(
-        MODEL_PATH
-    )
-
-
-# ==========================================================
-# LOAD SCALER
-# ==========================================================
-
-def load_scaler():
-
-    if not os.path.exists(SCALER_PATH):
-
-        raise FileNotFoundError(
-            "Scaler not found. "
-            "Please run preprocessing first."
-        )
-
-    return joblib.load(
-        SCALER_PATH
-    )
-
-
-# ==========================================================
-# VALIDATE INPUT
-# ==========================================================
-
-def validate_input(
-    cgpa,
-    attendance,
-    aptitude_score,
-    coding_score,
-    communication_score,
-    technical_score
-):
-
-    values = [
-        cgpa,
-        attendance,
-        aptitude_score,
-        coding_score,
-        communication_score,
-        technical_score
-    ]
-
-    # Check numeric values
-    try:
-
-        values = [
-            float(value)
-            for value in values
-        ]
-
-    except (TypeError, ValueError):
-
-        raise ValueError(
-            "All prediction inputs must be numeric."
-        )
-
-
-    # Validate CGPA
-    if not 0 <= values[0] <= 10:
-
-        raise ValueError(
-            "CGPA must be between 0 and 10."
-        )
-
-
-    # Validate remaining scores
-    for value in values[1:]:
-
-        if not 0 <= value <= 100:
-
-            raise ValueError(
-                "Attendance and skill scores "
-                "must be between 0 and 100."
-            )
-
-
-    return values
-
-
-# ==========================================================
-# MAKE PREDICTION
-# ==========================================================
-
-def predict_placement(
-    cgpa,
-    attendance,
-    aptitude_score,
-    coding_score,
-    communication_score,
-    technical_score
-):
-
-    # Validate input
-    values = validate_input(
-        cgpa,
-        attendance,
-        aptitude_score,
-        coding_score,
-        communication_score,
-        technical_score
-    )
-
-
-    # Load model and scaler
-    model = load_model()
-    scaler = load_scaler()
-
-
-    # Convert input into NumPy array
-    input_data = pd.DataFrame(
-    [values],
-    columns=[
-        "cgpa",
-        "attendance",
-        "aptitude_score",
-        "coding_score",
-        "communication_score",
-        "technical_score"
-    ]
-)
-
-
-    # Scale input
-    input_scaled = scaler.transform(
-        input_data
-    )
-
-
-    # Predict class
-    prediction = model.predict(
-        input_scaled
-    )[0]
-
-
-    # Get probability
-    probabilities = model.predict_proba(
-        input_scaled
-    )[0]
-
-
-    # Probability of placement
-    placement_probability = (
-        probabilities[1] * 100
-    )
-
-
-    # Probability of not being placed
-    not_placed_probability = (
-        probabilities[0] * 100
-    )
-
-
-    # Convert prediction to readable result
-    if prediction == 1:
-
-        result = "Placed"
-
+    placed = probability >= 0.5
+    placement = round(probability * 100, 2)
+    if placement >= 75:
+        band = "High"
+    elif placement >= 50:
+        band = "Moderate"
     else:
-
-        result = "Not Placed"
-
-
+        band = "Low"
     return {
-        "prediction": int(prediction),
-        "result": result,
-        "placement_probability": round(
-            placement_probability,
-            2
-        ),
-        "not_placed_probability": round(
-            not_placed_probability,
-            2
-        )
+        "prediction": int(placed),
+        "result": "Placed" if placed else "Not Placed",
+        "placement_probability": placement,
+        "not_placed_probability": round(100 - placement, 2),
+        "confidence": round(max(placement, 100 - placement), 2),
+        "band": band,
+        "model_version": meta["version"],
+        "factors": factors,
+        "strengths": [f for f in factors if f["impact"] > 0.5][:3],
+        "risks": [f for f in factors if f["impact"] < -0.5][:3][::-1] or [],
     }
-
-
-# ==========================================================
-# TEST PREDICTION
-# ==========================================================
-
-if __name__ == "__main__":
-
-    try:
-
-        result = predict_placement(
-            cgpa=8.5,
-            attendance=88,
-            aptitude_score=82,
-            coding_score=85,
-            communication_score=80,
-            technical_score=87
-        )
-
-
-        print(
-            "=========================================="
-        )
-
-        print(
-            "PLACEMENT PREDICTION"
-        )
-
-        print(
-            "=========================================="
-        )
-
-        print(
-            f"Prediction          : "
-            f"{result['result']}"
-        )
-
-        print(
-            f"Placement Probability: "
-            f"{result['placement_probability']}%"
-        )
-
-        print(
-            f"Not Placed Probability: "
-            f"{result['not_placed_probability']}%"
-        )
-
-        print(
-            "=========================================="
-        )
-
-
-    except Exception as error:
-
-        print(
-            "Prediction Error:",
-            error
-        )

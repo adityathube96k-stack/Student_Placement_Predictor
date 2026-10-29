@@ -1,727 +1,208 @@
-from flask import (
-    Blueprint,
-    render_template,
-    redirect,
-    url_for,
-    session,
-    flash
-)
+from datetime import date, datetime
 
-from database.db import get_connection
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 
+from analytics import company_analytics as ca
+from analytics import placement_analytics as pa
+from analytics.dashboard_stats import tpo_overview
+from company_eligibility.eligibility_checker import check_all_companies
+from models.company import Company, Drive
+from models.report import Report
+from models.student import Student
+from notifications.service import notify, notify_many
+from routes._common import float_field, user_id
+from utils.constants import APPLICATION_STATUSES, BRANCHES, DRIVE_STATUSES
+from utils.decorators import tpo_required
 
-tpo_bp = Blueprint(
-    "tpo",
-    __name__,
-    url_prefix="/tpo"
-)
+tpo_bp = Blueprint("tpo", __name__, url_prefix="/tpo")
 
-
-# =====================================================
-# TPO ACCESS CONTROL
-# =====================================================
-
-def tpo_required():
-    if "user_id" not in session:
-        return False
-
-    if session.get("role") != "tpo":
-        return False
-
-    return True
-
-
-# =====================================================
-# TPO DASHBOARD
-# =====================================================
 
 @tpo_bp.route("/dashboard")
+@tpo_required
 def dashboard():
+    return render_template("tpo/tpo_dashboard.html", overview=tpo_overview(), branches=pa.branch_breakdown(),
+                           funnel=ca.drive_funnel(), matrix=ca.eligibility_matrix()[:6])
 
-    if not tpo_required():
-        flash("TPO access required.", "error")
-        return redirect(url_for("auth.login"))
-
-    connection = None
-
-    stats = {
-        "total_students": 0,
-        "total_predictions": 0,
-        "placed_students": 0,
-        "not_placed_students": 0
-    }
-
-    try:
-
-        connection = get_connection()
-
-        with connection.cursor() as cursor:
-
-            # -----------------------------------------
-            # TOTAL STUDENTS
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM students
-            """)
-
-            result = cursor.fetchone()
-
-            stats["total_students"] = result["total"] or 0
-
-
-            # -----------------------------------------
-            # TOTAL PREDICTIONS
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM prediction_history
-            """)
-
-            result = cursor.fetchone()
-
-            stats["total_predictions"] = result["total"] or 0
-
-
-            # -----------------------------------------
-            # PLACED PREDICTIONS
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM prediction_history
-                WHERE prediction = 'Placed'
-            """)
-
-            result = cursor.fetchone()
-
-            stats["placed_students"] = result["total"] or 0
-
-
-            # -----------------------------------------
-            # NOT PLACED PREDICTIONS
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM prediction_history
-                WHERE prediction = 'Not Placed'
-            """)
-
-            result = cursor.fetchone()
-
-            stats["not_placed_students"] = result["total"] or 0
-
-
-        return render_template(
-            "tpo/tpo_dashboard.html",
-            stats=stats
-        )
-
-
-    except Exception as error:
-
-        print("TPO Dashboard Error:", error)
-
-        flash(
-            "Unable to load TPO dashboard.",
-            "error"
-        )
-
-        return redirect(
-            url_for("auth.login")
-        )
-
-
-    finally:
-
-        if connection:
-            connection.close()
-
-
-# =====================================================
-# PLACEMENT STATISTICS
-# =====================================================
 
 @tpo_bp.route("/placement-statistics")
+@tpo_required
 def placement_statistics():
+    return render_template(
+        "tpo/placement_statistics.html", outcomes=pa.placement_outcomes(), branches=pa.branch_breakdown(),
+        cgpa=pa.cgpa_histogram(), readiness=pa.readiness_distribution(), demand=ca.skills_demand_vs_supply(),
+        predictions=pa.prediction_summary(), status=pa.status_breakdown(), matrix=ca.eligibility_matrix())
 
-    if not tpo_required():
-        flash(
-            "TPO access required.",
-            "error"
-        )
-
-        return redirect(
-            url_for("auth.login")
-        )
-
-    connection = None
-
-    statistics = {
-        "total_students": 0,
-        "total_predictions": 0,
-        "placed_predictions": 0,
-        "not_placed_predictions": 0,
-        "placement_rate": 0,
-        "average_cgpa": 0,
-        "average_attendance": 0,
-        "average_aptitude": 0,
-        "average_coding": 0,
-        "average_communication": 0,
-        "average_technical": 0
-    }
-
-    try:
-
-        connection = get_connection()
-
-        with connection.cursor() as cursor:
-
-            # -----------------------------------------
-            # STUDENT COUNT
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM students
-            """)
-
-            result = cursor.fetchone()
-
-            statistics["total_students"] = result["total"] or 0
-
-
-            # -----------------------------------------
-            # STUDENT AVERAGES
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT
-                    AVG(cgpa) AS average_cgpa,
-                    AVG(attendance) AS average_attendance,
-                    AVG(aptitude_score) AS average_aptitude,
-                    AVG(coding_score) AS average_coding,
-                    AVG(communication_score)
-                        AS average_communication,
-                    AVG(technical_score)
-                        AS average_technical
-                FROM students
-            """)
-
-            result = cursor.fetchone()
-
-            statistics["average_cgpa"] = round(
-                float(result["average_cgpa"] or 0),
-                2
-            )
-
-            statistics["average_attendance"] = round(
-                float(result["average_attendance"] or 0),
-                2
-            )
-
-            statistics["average_aptitude"] = round(
-                float(result["average_aptitude"] or 0),
-                2
-            )
-
-            statistics["average_coding"] = round(
-                float(result["average_coding"] or 0),
-                2
-            )
-
-            statistics["average_communication"] = round(
-                float(result["average_communication"] or 0),
-                2
-            )
-
-            statistics["average_technical"] = round(
-                float(result["average_technical"] or 0),
-                2
-            )
-
-
-            # -----------------------------------------
-            # PREDICTION STATISTICS
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM prediction_history
-            """)
-
-            result = cursor.fetchone()
-
-            statistics["total_predictions"] = (
-                result["total"] or 0
-            )
-
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM prediction_history
-                WHERE prediction = 'Placed'
-            """)
-
-            result = cursor.fetchone()
-
-            statistics["placed_predictions"] = (
-                result["total"] or 0
-            )
-
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM prediction_history
-                WHERE prediction = 'Not Placed'
-            """)
-
-            result = cursor.fetchone()
-
-            statistics["not_placed_predictions"] = (
-                result["total"] or 0
-            )
-
-
-            # -----------------------------------------
-            # PLACEMENT RATE
-            # -----------------------------------------
-
-            if statistics["total_predictions"] > 0:
-
-                statistics["placement_rate"] = round(
-                    (
-                        statistics["placed_predictions"]
-                        /
-                        statistics["total_predictions"]
-                    ) * 100,
-                    2
-                )
-
-
-        return render_template(
-            "tpo/placement_statistics.html",
-            statistics=statistics
-        )
-
-
-    except Exception as error:
-
-        print(
-            "TPO Placement Statistics Error:",
-            error
-        )
-
-        flash(
-            "Unable to load placement statistics.",
-            "error"
-        )
-
-        return redirect(
-            url_for("tpo.dashboard")
-        )
-
-
-    finally:
-
-        if connection:
-            connection.close()
-
-
-# =====================================================
-# ELIGIBLE STUDENTS
-# =====================================================
 
 @tpo_bp.route("/eligible-students")
+@tpo_required
 def eligible_students():
-
-    if not tpo_required():
-        flash(
-            "TPO access required.",
-            "error"
-        )
-
-        return redirect(
-            url_for("auth.login")
-        )
-
-    connection = None
-
-    students = []
-
-    placed_count = 0
-    average_cgpa = 0
-
+    companies = Company.all(active_only=True)
     try:
-
-        connection = get_connection()
-
-        with connection.cursor() as cursor:
-
-            # -----------------------------------------
-            # STUDENT ELIGIBILITY DATA
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT
-                    s.id,
-                    u.full_name,
-                    u.email,
-                    s.enrollment_no,
-                    s.branch,
-                    s.cgpa,
-                    s.attendance,
-                    s.aptitude_score,
-                    s.coding_score,
-                    s.communication_score,
-                    s.technical_score,
-
-                    (
-                        SELECT ph.prediction
-                        FROM prediction_history ph
-                        WHERE ph.user_id = s.user_id
-                        ORDER BY ph.created_at DESC
-                        LIMIT 1
-                    ) AS prediction
-
-                FROM students s
-
-                INNER JOIN users u
-                    ON s.user_id = u.id
-
-                ORDER BY s.cgpa DESC
-            """)
-
-            students = cursor.fetchall()
+        selected_id = int(request.args.get("company_id") or (companies[0]["id"] if companies else 0))
+    except ValueError:
+        selected_id = companies[0]["id"] if companies else 0
+    branch = request.args.get("branch", "")
+    selected = next((c for c in companies if c["id"] == selected_id), None)
+    eligible, near = [], []
+    if selected:
+        rule = Company.as_rule(selected)
+        for s in Student.all(branch=branch):
+            if not Student.has_scores(s):
+                continue
+            res = check_all_companies(s["cgpa"], s["attendance"], s["aptitude_score"], s["coding_score"],
+                                      s["communication_score"], s["technical_score"], s.get("skills"),
+                                      s.get("backlogs") or 0, [rule])[0]
+            row = dict(s, match=res["match_percent"], missing=res["missing_requirements"],
+                       missing_skills=res["missing_skills"])
+            if res["eligible"]:
+                eligible.append(row)
+            elif res["match_percent"] >= 75:
+                near.append(row)
+        eligible.sort(key=lambda r: -r["cgpa"])
+        near.sort(key=lambda r: -r["match"])
+    return render_template("tpo/eligible_students.html", companies=companies, selected=selected,
+                           eligible=eligible, near=near, branches=BRANCHES, branch=branch)
 
 
-            # -----------------------------------------
-            # PLACED COUNT
-            # -----------------------------------------
+# --- Drives ---------------------------------------------------------------------
 
-            for student in students:
+def _drive_form(form):
+    try:
+        company_id = int(form.get("company_id", ""))
+    except ValueError:
+        raise ValueError("Choose a company.") from None
+    if not Company.get(company_id):
+        raise ValueError("Choose a company.")
+    role = form.get("job_role", "").strip()
+    if len(role) < 2:
+        raise ValueError("Job role is required.")
+    try:
+        drive_date = date.fromisoformat(form.get("drive_date", ""))
+    except ValueError:
+        raise ValueError("Enter a valid drive date.") from None
+    status = form.get("status", "Upcoming")
+    if status not in DRIVE_STATUSES:
+        raise ValueError("Invalid status.")
+    return {"company_id": company_id, "job_role": role, "drive_date": drive_date,
+            "location": form.get("location", "").strip() or None,
+            "openings": int(float_field(form, "openings", 1, 1000, "Openings")),
+            "package_lpa": float_field(form, "package_lpa", 0, 500, "Package"),
+            "status": status, "description": form.get("description", "").strip() or None}
 
-                if student["prediction"] == "Placed":
-                    placed_count += 1
-
-
-            # -----------------------------------------
-            # AVERAGE CGPA
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT AVG(cgpa) AS average_cgpa
-                FROM students
-                WHERE cgpa IS NOT NULL
-            """)
-
-            result = cursor.fetchone()
-
-            average_cgpa = round(
-                float(result["average_cgpa"] or 0),
-                2
-            )
-
-
-        return render_template(
-            "tpo/eligible_students.html",
-            students=students,
-            placed_count=placed_count,
-            average_cgpa=average_cgpa
-        )
-
-
-    except Exception as error:
-
-        print(
-            "TPO Eligible Students Error:",
-            error
-        )
-
-        flash(
-            "Unable to load eligible students.",
-            "error"
-        )
-
-        return redirect(
-            url_for("tpo.dashboard")
-        )
-
-
-    finally:
-
-        if connection:
-            connection.close()
-
-
-# =====================================================
-# COMPANY DRIVES
-# =====================================================
 
 @tpo_bp.route("/company-drives")
+@tpo_required
 def company_drives():
-
-    if not tpo_required():
-        flash(
-            "TPO access required.",
-            "error"
-        )
-
-        return redirect(
-            url_for("auth.login")
-        )
-
-    # -------------------------------------------------
-    # DEMO PLACEMENT DRIVES
-    #
-    # These are sample drives for the project UI.
-    # They are NOT real company hiring requirements.
-    # -------------------------------------------------
-
-    drives = [
-
-        {
-            "company_name": "TCS",
-            "job_role": "Graduate Engineer Trainee",
-            "drive_date": "15 October 2026",
-            "location": "Pune",
-            "min_cgpa": "6.50",
-            "openings": 25,
-            "status": "Active",
-            "skills": [
-                "Python",
-                "SQL",
-                "Problem Solving",
-                "Communication"
-            ]
-        },
-
-        {
-            "company_name": "Infosys",
-            "job_role": "Systems Engineer",
-            "drive_date": "20 October 2026",
-            "location": "Pune",
-            "min_cgpa": "6.00",
-            "openings": 20,
-            "status": "Active",
-            "skills": [
-                "Java",
-                "Python",
-                "SQL",
-                "Communication"
-            ]
-        },
-
-        {
-            "company_name": "Wipro",
-            "job_role": "Project Engineer",
-            "drive_date": "25 October 2026",
-            "location": "Mumbai",
-            "min_cgpa": "6.00",
-            "openings": 15,
-            "status": "Active",
-            "skills": [
-                "Python",
-                "Java",
-                "SQL",
-                "Problem Solving"
-            ]
-        },
-
-        {
-            "company_name": "Accenture",
-            "job_role": "Associate Software Engineer",
-            "drive_date": "30 October 2026",
-            "location": "Pune",
-            "min_cgpa": "6.50",
-            "openings": 30,
-            "status": "Active",
-            "skills": [
-                "Python",
-                "SQL",
-                "Web Development",
-                "Communication"
-            ]
-        },
-
-        {
-            "company_name": "Capgemini",
-            "job_role": "Software Engineer",
-            "drive_date": "05 November 2026",
-            "location": "Pune",
-            "min_cgpa": "6.00",
-            "openings": 18,
-            "status": "Active",
-            "skills": [
-                "Python",
-                "SQL",
-                "Problem Solving",
-                "Technical Skills"
-            ]
-        }
-
-    ]
+    status = request.args.get("status", "")
+    return render_template("tpo/company_drives.html", drives=Drive.all(status or None), status=status,
+                           statuses=DRIVE_STATUSES)
 
 
-    # -------------------------------------------------
-    # TOTAL OPENINGS
-    # -------------------------------------------------
+@tpo_bp.route("/drives/new", methods=["GET", "POST"])
+@tpo_required
+def drive_new():
+    companies = Company.all(active_only=True)
+    if request.method == "POST":
+        try:
+            data = _drive_form(request.form)
+        except ValueError as error:
+            flash(str(error), "danger")
+            return render_template("tpo/drive_form.html", drive=request.form, companies=companies, mode="new",
+                                   statuses=DRIVE_STATUSES), 400
+        Drive.create(data, user_id())
+        company = Company.get(data["company_id"])
+        if data["status"] in ("Upcoming", "Active"):
+            rule = Company.as_rule(company)
+            ids = []
+            for s in Student.all():
+                if Student.has_scores(s) and check_all_companies(
+                        s["cgpa"], s["attendance"], s["aptitude_score"], s["coding_score"],
+                        s["communication_score"], s["technical_score"], s.get("skills"),
+                        s.get("backlogs") or 0, [rule])[0]["eligible"]:
+                    ids.append(s["user_id"])
+            notify_many(ids, "new_drive", "drive", "/student/drives", company=company["name"],
+                        role=data["job_role"], date=data["drive_date"].strftime("%d %b"))
+            flash(f"Drive created. {len(ids)} eligible student(s) were notified.", "success")
+        else:
+            flash("Drive created.", "success")
+        return redirect(url_for("tpo.company_drives"))
+    return render_template("tpo/drive_form.html", drive={"status": "Upcoming", "openings": 5, "drive_date": date.today().isoformat()},
+                           companies=companies, mode="new", statuses=DRIVE_STATUSES)
 
-    total_openings = sum(
-        drive["openings"]
-        for drive in drives
-    )
+
+@tpo_bp.route("/drives/<int:drive_id>/edit", methods=["GET", "POST"])
+@tpo_required
+def drive_edit(drive_id):
+    drive = Drive.get(drive_id)
+    if not drive:
+        flash("Drive not found.", "danger")
+        return redirect(url_for("tpo.company_drives"))
+    companies = Company.all()
+    if request.method == "POST":
+        try:
+            data = _drive_form(request.form)
+        except ValueError as error:
+            flash(str(error), "danger")
+            return render_template("tpo/drive_form.html", drive=request.form, companies=companies, mode="edit",
+                                   drive_id=drive_id, statuses=DRIVE_STATUSES), 400
+        Drive.update(drive_id, data)
+        flash("Drive updated.", "success")
+        return redirect(url_for("tpo.company_drives"))
+    if isinstance(drive.get("drive_date"), (date, datetime)):
+        drive["drive_date"] = drive["drive_date"].strftime("%Y-%m-%d")
+    return render_template("tpo/drive_form.html", drive=drive, companies=companies, mode="edit",
+                           drive_id=drive_id, statuses=DRIVE_STATUSES)
 
 
-    return render_template(
-        "tpo/company_drives.html",
-        drives=drives,
-        total_openings=total_openings
-    )
+@tpo_bp.route("/drives/<int:drive_id>/delete", methods=["POST"])
+@tpo_required
+def drive_delete(drive_id):
+    if Drive.get(drive_id):
+        Drive.delete(drive_id)
+        flash("Drive deleted.", "success")
+    return redirect(url_for("tpo.company_drives"))
 
 
-# =====================================================
-# PLACEMENT REPORTS
-# =====================================================
+@tpo_bp.route("/drives/<int:drive_id>/applicants")
+@tpo_required
+def drive_applicants(drive_id):
+    drive = Drive.get(drive_id)
+    if not drive:
+        flash("Drive not found.", "danger")
+        return redirect(url_for("tpo.company_drives"))
+    return render_template("tpo/drive_applicants.html", drive=drive, applicants=Drive.applicants(drive_id),
+                           statuses=APPLICATION_STATUSES)
+
+
+@tpo_bp.route("/applications/<int:application_id>/status", methods=["POST"])
+@tpo_required
+def application_status(application_id):
+    app_row = Drive.get_application(application_id)
+    status = request.form.get("status", "")
+    if not app_row or status not in APPLICATION_STATUSES:
+        flash("Invalid request.", "danger")
+        return redirect(url_for("tpo.company_drives"))
+    previous = app_row["status"]
+    Drive.set_application_status(application_id, status)
+    uid = app_row["user_id"]
+    if status == "Selected":
+        Student.set_placement(uid, "Placed", app_row["company_name"], app_row["package_lpa"])
+        notify(uid, "selected", "success", "/student/drives", company=app_row["company_name"],
+               role=app_row["job_role"])
+    else:
+        if previous == "Selected":
+            student = Student.get_by_user_id(uid)
+            if student and student.get("placed_company") == app_row["company_name"]:
+                Student.set_placement(uid, "Not Placed")
+        if status != previous:
+            notify(uid, "application_status", "drive", "/student/drives", company=app_row["company_name"],
+                   role=app_row["job_role"], status=status)
+    flash("Application updated.", "success")
+    return redirect(url_for("tpo.drive_applicants", drive_id=app_row["drive_id"]))
+
 
 @tpo_bp.route("/reports")
+@tpo_required
 def reports():
-
-    if not tpo_required():
-        flash(
-            "TPO access required.",
-            "error"
-        )
-
-        return redirect(
-            url_for("auth.login")
-        )
-
-    connection = None
-
-    report = {
-        "total_students": 0,
-        "total_predictions": 0,
-        "placed_predictions": 0,
-        "not_placed_predictions": 0,
-        "placement_rate": 0
-    }
-
-    try:
-
-        connection = get_connection()
-
-        with connection.cursor() as cursor:
-
-            # -----------------------------------------
-            # TOTAL STUDENTS
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM students
-            """)
-
-            result = cursor.fetchone()
-
-            report["total_students"] = (
-                result["total"] or 0
-            )
-
-
-            # -----------------------------------------
-            # TOTAL PREDICTIONS
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM prediction_history
-            """)
-
-            result = cursor.fetchone()
-
-            report["total_predictions"] = (
-                result["total"] or 0
-            )
-
-
-            # -----------------------------------------
-            # PLACED PREDICTIONS
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM prediction_history
-                WHERE prediction = 'Placed'
-            """)
-
-            result = cursor.fetchone()
-
-            report["placed_predictions"] = (
-                result["total"] or 0
-            )
-
-
-            # -----------------------------------------
-            # NOT PLACED PREDICTIONS
-            # -----------------------------------------
-
-            cursor.execute("""
-                SELECT COUNT(*) AS total
-                FROM prediction_history
-                WHERE prediction = 'Not Placed'
-            """)
-
-            result = cursor.fetchone()
-
-            report["not_placed_predictions"] = (
-                result["total"] or 0
-            )
-
-
-            # -----------------------------------------
-            # PLACEMENT RATE
-            # -----------------------------------------
-
-            if report["total_predictions"] > 0:
-
-                report["placement_rate"] = round(
-                    (
-                        report["placed_predictions"]
-                        /
-                        report["total_predictions"]
-                    ) * 100,
-                    2
-                )
-
-
-        return render_template(
-            "tpo/placement_reports.html",
-            report=report
-        )
-
-
-    except Exception as error:
-
-        print(
-            "TPO Placement Reports Error:",
-            error
-        )
-
-        flash(
-            "Unable to load placement reports.",
-            "error"
-        )
-
-        return redirect(
-            url_for("tpo.dashboard")
-        )
-
-
-    finally:
-
-        if connection:
-            connection.close()
+    return render_template("tpo/placement_reports.html", outcomes=pa.placement_outcomes(),
+                           recent=Report.recent(None, 8))

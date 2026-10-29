@@ -1,7 +1,19 @@
-
 services:
   - type: web
     name: student-placement-predictor
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn run:app
+    startCommand: gunicorn --preload -w 2 --threads 4 run:app
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SESSION_COOKIE_SECURE
+        value: "1"
+      # Demo deployment on ephemeral SQLite. Set SEED_DEMO_DATA to "false" and
+      # provide ADMIN_EMAIL / ADMIN_PASSWORD (or use MySQL) for real use.
+      - key: SEED_DEMO_DATA
+        value: "true"

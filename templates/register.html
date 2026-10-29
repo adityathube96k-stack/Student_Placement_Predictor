@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | StudentPredict AI</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+    <main class="auth-container">
+        <section class="auth-card">
+            <a class="auth-brand" href="{{ url_for('pages.home') }}">
+                <span class="auth-logo">SP</span>
+                <span>StudentPredict <strong>AI</strong></span>
+            </a>
+
+            <div class="auth-heading">
+                <h1>Create your account</h1>
+                <p>Start preparing for your placement journey.</p>
+            </div>
+
+            <div id="message" class="auth-message" role="alert"
+                 aria-live="polite" hidden></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="name">Full name</label>
+                    <input type="text" id="name" name="name"
+                           placeholder="Enter your full name"
+                           autocomplete="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" name="email"
+                           placeholder="you@example.com"
+                           autocomplete="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="student_id">Student ID</label>
+                    <input type="text" id="student_id" name="student_id"
+                           placeholder="Enter your student ID" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password"
+                           placeholder="Create a password"
+                           autocomplete="new-password"
+                           minlength="8" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm password</label>
+                    <input type="password" id="confirm_password"
+                           name="confirm_password"
+                           placeholder="Re-enter your password"
+                           autocomplete="new-password"
+                           minlength="8" required>
+                </div>
+
+                <button type="submit" class="auth-submit" id="submitBtn">
+                    Create Account
+                </button>
+            </form>
+
+            <p class="auth-switch">
+                Already have an account?
+                <a href="{{ url_for('pages.login_page') }}">Sign in</a>
+            </p>
+
+            <a class="back-home" href="{{ url_for('pages.home') }}">
+                ← Back to home
+            </a>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>
+

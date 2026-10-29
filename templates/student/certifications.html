@@ -1,0 +1,20 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, badge %}
+{% block title %}Certifications{% endblock %}
+{% block content %}
+{% call page_head('Certifications worth earning', 'Ranked by how well they cover skills you are missing.') %}
+  <a class="btn btn--secondary" href="{{ url_for('recommendation.recommendations') }}">{{ icon('zap') }} Recommendations</a>
+{% endcall %}
+<div class="grid grid--3 cert-grid">
+  {% for c in certifications %}
+  <article class="card cert">
+    <div class="card__body stack">
+      <div class="row between"><span class="list-icon list-icon--gold">{{ icon('award') }}</span>{{ badge(c.level, 'info') }}</div>
+      <div><h3 style="font-size:var(--text-md)">{{ c.name }}</h3><div class="text-sm muted">{{ c.issuer }} · about {{ c.weeks }} weeks</div></div>
+      <p class="muted text-sm">{{ c.why }}</p>
+      {% if c.matched %}<div class="tag-list">{% for m in c.matched %}<span class="chip chip--ok">{{ icon('check', 'icon--sm') }}Covers {{ m|title }}</span>{% endfor %}</div>{% endif %}
+    </div>
+    <div class="card__foot"><a class="link-btn" href="{{ c.url }}" target="_blank" rel="noopener noreferrer">View programme {{ icon('external', 'icon--sm') }}</a></div>
+  </article>{% endfor %}
+</div>
+{% endblock %}

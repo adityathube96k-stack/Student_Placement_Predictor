@@ -1,222 +1,62 @@
-from flask import (
-    Blueprint,
-    render_template,
-    redirect,
-    url_for,
-    session,
-    flash
-)
+from collections import Counter
 
-from database.db import get_connection
+from flask import Blueprint, render_template
 
-from recommendation_engine.skill_gap import (
-    calculate_skill_gap
-)
+from models.recommendation import Recommendation
 
-from recommendation_engine.skill_recommendation import (
-    generate_skill_recommendations
-)
+from company_eligibility.eligibility_checker import check_student
+from recommendation_engine.career_roadmap import build_roadmap, suggest_roles
+from recommendation_engine.certification_recommender import recommend_certifications
+from recommendation_engine.course_recommender import recommend_courses
+from recommendation_engine.learning_path import build_learning_path
+from recommendation_engine.skill_gap import calculate_skill_gap
+from recommendation_engine.skill_recommendation import generate_skill_recommendations
+from routes._common import get_student, need_scores
+from utils.decorators import student_required
+from utils.helpers import split_skills
+
+recommendation_bp = Blueprint("recommendation", __name__, url_prefix="/student")
 
 
-recommendation_bp = Blueprint(
-    "recommendation",
-    __name__,
-    url_prefix="/student"
-)
+def _context(student):
+    return Recommendation.context(student)
 
 
 @recommendation_bp.route("/recommendations")
+@student_required
 def recommendations():
+    student = get_student()
+    blocked = need_scores(student)
+    if blocked:
+        return blocked
+    gap, missing = _context(student)
+    return render_template(
+        "student/recommendations.html", student=student, skill_gap=gap,
+        recommendations=generate_skill_recommendations(gap["skills"]),
+        courses=recommend_courses(gap["skills"], student.get("skills"), missing),
+        path=build_learning_path(gap["skills"]), roles=suggest_roles(student.get("skills")),
+        student_skills=split_skills(student.get("skills")), missing_skills=missing)
 
-    # =================================================
-    # LOGIN CHECK
-    # =================================================
 
-    if "user_id" not in session:
+@recommendation_bp.route("/roadmap")
+@student_required
+def roadmap():
+    student = get_student()
+    blocked = need_scores(student)
+    if blocked:
+        return blocked
+    gap, _ = _context(student)
+    return render_template("student/roadmap.html", student=student, skill_gap=gap,
+                           roadmap=build_roadmap(gap, student.get("skills")))
 
-        return redirect(
-            url_for("auth.login")
-        )
 
-    # =================================================
-    # ROLE CHECK
-    # =================================================
-
-    if session.get("role") != "student":
-
-        flash(
-            "Access denied.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("auth.login")
-        )
-
-    connection = None
-
-    try:
-
-        # =================================================
-        # DATABASE CONNECTION
-        # =================================================
-
-        connection = get_connection()
-
-        with connection.cursor() as cursor:
-
-            cursor.execute(
-                """
-                SELECT
-                    cgpa,
-                    attendance,
-                    aptitude_score,
-                    coding_score,
-                    communication_score,
-                    technical_score,
-                    skills
-                FROM students
-                WHERE user_id = %s
-                """,
-                (session["user_id"],)
-            )
-
-            student = cursor.fetchone()
-
-        # =================================================
-        # PROFILE CHECK
-        # =================================================
-
-        if not student:
-
-            flash(
-                "Student profile not found.",
-                "danger"
-            )
-
-            return redirect(
-                url_for("dashboard.dashboard")
-            )
-
-        # =================================================
-        # SCORE VALIDATION
-        # =================================================
-
-        required_scores = [
-            student["cgpa"],
-            student["attendance"],
-            student["aptitude_score"],
-            student["coding_score"],
-            student["communication_score"],
-            student["technical_score"]
-        ]
-
-        if any(
-            score is None
-            for score in required_scores
-        ):
-
-            flash(
-                "Please complete your academic and skill scores in your profile first.",
-                "warning"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        # =================================================
-        # CALCULATE SKILL GAP
-        # =================================================
-
-        skill_gap_result = calculate_skill_gap(
-
-            aptitude_score=float(
-                student["aptitude_score"]
-            ),
-
-            coding_score=float(
-                student["coding_score"]
-            ),
-
-            communication_score=float(
-                student["communication_score"]
-            ),
-
-            technical_score=float(
-                student["technical_score"]
-            )
-        )
-
-        # =================================================
-        # GENERATE SKILL RECOMMENDATIONS
-        # =================================================
-
-        recommendations = generate_skill_recommendations(
-            skill_gap_result["skills"]
-        )
-
-        # =================================================
-        # STUDENT SKILLS
-        # =================================================
-
-        student_skills = student.get(
-            "skills"
-        )
-
-        if student_skills:
-
-            skill_list = [
-                skill.strip()
-                for skill in student_skills.split(",")
-                if skill.strip()
-            ]
-
-        else:
-
-            skill_list = []
-
-        # =================================================
-        # RENDER RECOMMENDATIONS PAGE
-        # =================================================
-
-        return render_template(
-
-            "student/recommendations.html",
-
-            recommendations=recommendations,
-
-            skill_gap=skill_gap_result,
-
-            student=student,
-
-            student_skills=skill_list
-
-        )
-
-    except Exception as error:
-
-        # =================================================
-        # ERROR LOG
-        # =================================================
-
-        print(
-            "Recommendation Route Error:",
-            repr(error)
-        )
-
-        flash(
-            "Unable to generate recommendations. "
-            "Please check the Flask terminal for the exact error.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("dashboard.dashboard")
-        )
-
-    finally:
-
-        if connection:
-
-            connection.close()
+@recommendation_bp.route("/certifications")
+@student_required
+def certifications():
+    student = get_student()
+    blocked = need_scores(student)
+    if blocked:
+        return blocked
+    _, missing = _context(student)
+    return render_template("student/certifications.html", student=student, missing_skills=missing,
+                           certifications=recommend_certifications(student.get("skills"), missing))

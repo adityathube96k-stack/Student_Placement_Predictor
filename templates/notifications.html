@@ -1,0 +1,16 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, csrf, empty %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+{% call page_head('Notifications', 'Drive announcements, application updates and system messages.') %}
+  {% if items|selectattr('is_read', 'equalto', 0)|list %}<form method="post" action="{{ url_for('notifications.read_all') }}">{{ csrf() }}<button class="btn btn--secondary" type="submit">{{ icon('check') }} Mark all as read</button></form>{% endif %}
+{% endcall %}
+<section class="card">
+  {% if items %}
+  <ul class="list">{% for n in items %}
+    <li class="notif-row {{ 'is-unread' if not n.is_read }}"><span class="list-icon {{ 'list-icon--gold' if n.category == 'drive' else ('list-icon--success' if n.category == 'success' else '') }}">{{ icon({'drive': 'briefcase', 'success': 'check-circle'}.get(n.category, 'bell')) }}</span>
+      <a class="grow notif-row__body" href="{{ url_for('notifications.open_item', notification_id=n.id, to=n.link or '') }}"><strong>{{ n.title }}</strong><div class="text-sm muted">{{ n.message }}</div><div class="text-xs faint mt-2">{{ n.created_at|time_ago }}</div></a>
+      <form method="post" action="{{ url_for('notifications.delete_item', notification_id=n.id) }}">{{ csrf() }}<button class="icon-btn" type="submit" aria-label="Delete">{{ icon('trash') }}</button></form></li>{% endfor %}</ul>
+  {% else %}{{ empty('bell', 'You are all caught up', 'New notifications will show up here.') }}{% endif %}
+</section>
+{% endblock %}

@@ -1,219 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Placement Prediction</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/prediction.css') }}">
-</head>
-
-<body>
-
-    <div class="prediction-container">
-
-        <div class="prediction-card">
-
-            <div class="prediction-header">
-
-                <h1>Placement Prediction</h1>
-
-                <p>
-                    Enter your academic and skill information
-                    to predict your placement probability.
-                </p>
-
-            </div>
-
-
-            <!-- Flash Messages -->
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-
-                {% if messages %}
-
-                    {% for category, message in messages %}
-
-                        <div class="alert {{ category }}">
-                            {{ message }}
-                        </div>
-
-                    {% endfor %}
-
-                {% endif %}
-
-            {% endwith %}
-
-
-            <!-- Prediction Form -->
-
-            <form method="POST"
-                  action="{{ url_for('prediction.prediction') }}">
-
-
-                <!-- CGPA -->
-
-                <div class="form-group">
-
-                    <label for="cgpa">
-                        CGPA
-                    </label>
-
-                    <input
-                        type="number"
-                        id="cgpa"
-                        name="cgpa"
-                        min="0"
-                        max="10"
-                        step="0.01"
-                        placeholder="Enter CGPA (0 - 10)"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Attendance -->
-
-                <div class="form-group">
-
-                    <label for="attendance">
-                        Attendance (%)
-                    </label>
-
-                    <input
-                        type="number"
-                        id="attendance"
-                        name="attendance"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        placeholder="Enter attendance percentage"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Aptitude -->
-
-                <div class="form-group">
-
-                    <label for="aptitude_score">
-                        Aptitude Score
-                    </label>
-
-                    <input
-                        type="number"
-                        id="aptitude_score"
-                        name="aptitude_score"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        placeholder="Enter aptitude score"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Coding -->
-
-                <div class="form-group">
-
-                    <label for="coding_score">
-                        Coding Score
-                    </label>
-
-                    <input
-                        type="number"
-                        id="coding_score"
-                        name="coding_score"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        placeholder="Enter coding score"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Communication -->
-
-                <div class="form-group">
-
-                    <label for="communication_score">
-                        Communication Score
-                    </label>
-
-                    <input
-                        type="number"
-                        id="communication_score"
-                        name="communication_score"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        placeholder="Enter communication score"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Technical -->
-
-                <div class="form-group">
-
-                    <label for="technical_score">
-                        Technical Score
-                    </label>
-
-                    <input
-                        type="number"
-                        id="technical_score"
-                        name="technical_score"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        placeholder="Enter technical score"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Submit -->
-
-                <button
-                    type="submit"
-                    class="prediction-button">
-
-                    Predict Placement
-
-                </button>
-
-            </form>
-
-
-            <!-- Back to Dashboard -->
-
-            <div class="back-link">
-
-                <a href="{{ url_for('dashboard.dashboard') }}">
-                    ← Back to Dashboard
-                </a>
-
-            </div>
-
-        </div>
-
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, csrf, number, slider, dial %}
+{% block title %}Placement prediction{% endblock %}
+{% block content %}
+{% call page_head('Placement prediction', 'Adjust the sliders to see how each change moves your probability. Save when you are happy with the inputs.') %}
+  <a class="btn btn--secondary" href="{{ url_for('prediction.prediction_history') }}">{{ icon('history') }} History</a>
+{% endcall %}
+<form method="post" class="grid grid--main" id="predict-form" data-loading data-preview-url="{{ url_for('prediction.preview') }}" novalidate>
+  {{ csrf() }}
+  <div class="card">
+    <section class="form-section">
+      <h3>Academics</h3><p>Defaults come from your profile.</p>
+      <div class="form-grid">
+        {{ number('cgpa', 'CGPA (out of 10)', values.get('cgpa'), 0, 10, 0.01) }}
+        {{ number('attendance', 'Attendance %', values.get('attendance'), 0, 100, 0.1) }}
+      </div>
+    </section>
+    <section class="form-section">
+      <h3>Skill scores</h3>
+      <div class="form-grid">
+        {{ slider('aptitude_score', 'Aptitude', values.get('aptitude_score')) }}
+        {{ slider('coding_score', 'Coding', values.get('coding_score')) }}
+        {{ slider('communication_score', 'Communication', values.get('communication_score')) }}
+        {{ slider('technical_score', 'Technical', values.get('technical_score')) }}
+      </div>
+    </section>
+    <section class="form-section">
+      <h3>Experience</h3>
+      <div class="form-grid form-grid--3">
+        {{ number('projects', 'Projects', values.get('projects') or 0, 0, 50, 1) }}
+        {{ number('internships', 'Internships', values.get('internships') or 0, 0, 20, 1) }}
+        {{ number('certifications', 'Certifications', values.get('certifications') or 0, 0, 50, 1) }}
+      </div>
+    </section>
+    <div class="form-actions"><button class="btn btn--primary btn--lg" type="submit">{{ icon('target') }} Save prediction</button></div>
+  </div>
+
+  <aside class="sticky-aside">
+    <div class="panel-ink live-card">
+      <div class="live-card__head"><strong>Live estimate</strong><span class="badge badge--gold" id="live-band">Preview</span></div>
+      <div class="live-card__dial">{{ dial(0, 'Probability', 'dial--lg', on_ink=True) }}</div>
+      <p class="muted text-sm center" id="live-note">Change any input to update the estimate. Nothing is saved until you submit.</p>
+      <div class="live-card__factors" id="live-factors"></div>
     </div>
-
-</body>
-</html>
+  </aside>
+</form>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/prediction.js') }}" defer></script>{% endblock %}

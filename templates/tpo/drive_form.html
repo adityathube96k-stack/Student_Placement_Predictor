@@ -1,0 +1,21 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, csrf, input, number %}
+{% block title %}{{ 'New drive' if mode == 'new' else 'Edit drive' }}{% endblock %}
+{% block crumbs %}<a class="crumb-parent" href="{{ url_for('tpo.company_drives') }}">Company drives</a>{{ icon('chevron-right') }}<strong>{{ 'New drive' if mode == 'new' else 'Edit drive' }}</strong>{% endblock %}
+{% block content %}
+{{ page_head('Create a drive' if mode == 'new' else 'Edit drive', 'Upcoming and active drives notify every student who meets the company criteria.' if mode == 'new' else '') }}
+<form method="post" class="card" data-loading novalidate>
+  {{ csrf() }}
+  <section class="form-section"><div class="form-grid">
+    <div class="field"><label class="label" for="company_id">Company</label><select class="select" id="company_id" name="company_id" required><option value="">Select company</option>{% for c in companies %}<option value="{{ c.id }}" {{ 'selected' if drive.get('company_id')|string == c.id|string }}>{{ c.name }}</option>{% endfor %}</select></div>
+    {{ input('job_role', 'Job role', drive.get('job_role'), required=True, placeholder='e.g. Software Engineer') }}
+    {{ input('drive_date', 'Drive date', drive.get('drive_date'), 'date', required=True) }}
+    {{ input('location', 'Location', drive.get('location')) }}
+    {{ number('openings', 'Openings', drive.get('openings'), 1, 1000, 1) }}
+    {{ number('package_lpa', 'Package (LPA)', drive.get('package_lpa'), 0, 500, 0.1) }}
+    <div class="field"><label class="label" for="status">Status</label><select class="select" id="status" name="status">{% for s in statuses %}<option {{ 'selected' if drive.get('status') == s }}>{{ s }}</option>{% endfor %}</select></div>
+    <div class="field span-2"><label class="label" for="description">Description <span class="opt">Optional</span></label><textarea class="textarea" id="description" name="description" rows="3">{{ drive.get('description') or '' }}</textarea></div>
+  </div></section>
+  <div class="form-actions"><a class="btn btn--ghost" href="{{ url_for('tpo.company_drives') }}">Cancel</a><button class="btn btn--primary" type="submit">{{ icon('check') }} {{ 'Create drive' if mode == 'new' else 'Save changes' }}</button></div>
+</form>
+{% endblock %}

@@ -1,3 +1,5 @@
+import re
+
 REQUIRED_SECTIONS = {
     "Contact Information": [
         "email",
@@ -63,6 +65,12 @@ def check_sections(resume_text):
                 break
 
         sections[section] = found
+
+    # Real contact details count even when the words "email"/"phone" never appear.
+    if not sections.get("Contact Information"):
+        has_email = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", resume_text or "")
+        has_phone = re.search(r"(\+?\d[\d\s().-]{8,}\d)", resume_text or "")
+        sections["Contact Information"] = bool(has_email or has_phone)
 
     return sections
 

@@ -1,0 +1,45 @@
+# docker compose up --build   ->   http://localhost:5000
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-change_me_please}
+      MYSQL_DATABASE: placement_predictor
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_PASSWORD:-change_me_please}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    environment:
+      APP_ENV: production
+      SECRET_KEY: ${SECRET_KEY:-replace-with-a-long-random-string}
+      DB_ENGINE: mysql
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change_me_please}
+      MYSQL_DATABASE: placement_predictor
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}   # set false for real data
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    volumes:
+      - uploads:/app/instance
+      - datasets:/app/dataset/uploads
+      - models:/app/ml/models
+
+volumes:
+  dbdata:
+  uploads:
+  datasets:
+  models:

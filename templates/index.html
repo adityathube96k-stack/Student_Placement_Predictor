@@ -1,148 +1,167 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layouts/public.html" %}
+{% from "partials/_macros.html" import icon, dial, meter %}
+{% block title %}Student Placement Predictor · Know your placement odds{% endblock %}
+{% block content %}
 
-<head>
-    <meta charset="UTF-8">
+<section class="hero panel-ink">
+  <div class="hero__inner">
+    <div class="hero__copy">
+      <span class="chip chip--gold">{{ icon('zap', 'icon--sm') }} Built for campus placement season</span>
+      <h1>Know your placement odds before the first drive.</h1>
+      <p class="hero__lead">Student Placement Predictor turns your marks, skills and resume into a placement probability, a readiness score and a plan to close the gaps. Placement cells get the same view across the whole batch.</p>
+      <div class="row row--wrap mt-6">
+        <a class="btn btn--gold btn--lg" href="{{ url_for('auth.register') }}">Create free account</a>
+        <a class="btn btn--on-ink btn--lg" href="{{ url_for('auth.login') }}">Sign in</a>
+      </div>
+      <dl class="hero__facts">
+        <div><dt class="serif num">{{ stats.students }}</dt><dd>students on the platform</dd></div>
+        <div><dt class="serif num">{{ stats.companies }}</dt><dd>companies tracked</dd></div>
+        <div><dt class="serif num">{{ stats.predictions }}</dt><dd>predictions run</dd></div>
+      </dl>
+    </div>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Student Placement Predictor</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-
-<body>
-
-    <!-- Navigation -->
-
-    <header class="navbar">
-
-        <div class="logo">
-            Student_Placement_Predictor
+    <div class="hero__visual" aria-label="Example student scorecard">
+      <div class="scorecard">
+        <div class="scorecard__head">
+          <span class="avatar">AP</span>
+          <div class="grow"><strong>Aditya Thube</strong><div class="text-sm muted">Artificial intelligence and data sciences, final year</div></div>
+          <span class="badge badge--info">Sample</span>
         </div>
+        <div class="scorecard__body">
+          {{ dial(82, 'Probability', 'dial--lg', 'high') }}
+          <div class="scorecard__bars">
+            <div class="meter-row"><span>Aptitude</span>{{ meter(74, '', 75) }}<span class="meter-row__val num">74</span></div>
+            <div class="meter-row"><span>Coding</span>{{ meter(81, 'good', 75) }}<span class="meter-row__val num">81</span></div>
+            <div class="meter-row"><span>Communication</span>{{ meter(66, 'warn', 70) }}<span class="meter-row__val num">66</span></div>
+            <div class="meter-row"><span>Technical</span>{{ meter(79, 'good', 75) }}<span class="meter-row__val num">79</span></div>
+          </div>
+        </div>
+        <div class="scorecard__foot tag-list">
+          <span class="chip chip--ok">{{ icon('check', 'icon--sm') }} Eligible: TCS</span>
+          <span class="chip chip--ok">{{ icon('check', 'icon--sm') }} Eligible: Infosys</span>
+          <span class="chip chip--miss">Missing: AWS</span>
+        </div>
+      </div>
+      <div class="scorecard-float">
+        <span class="list-icon list-icon--gold">{{ icon('file') }}</span>
+        <div><div class="text-sm muted">Resume score</div><strong class="serif" style="font-size:1.4rem">78 / 100</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <a href="/health" target="_blank">
-            API Health
-        </a>
+<section class="section" id="features">
+  <div class="section__inner">
+    <div class="section__head">
+      <h2>Everything between your marksheet and an offer letter</h2>
+      <p class="muted">Six tools that share one profile, so each analysis builds on the last.</p>
+    </div>
+    <div class="bento">
+      <article class="bento__card bento__card--pred">
+        <span class="list-icon">{{ icon('target') }}</span>
+        <h3>Placement prediction</h3>
+        <p>A model trained on past placement outcomes estimates your chance of being placed, then shows which of your scores helps or hurts most.</p>
+        <div class="pred-demo">
+          {{ dial(72, 'Probability', 'dial--md', 'mid') }}
+          <div class="factor-demo">
+            <div class="factor"><span>Coding</span><i style="--w: 78%" class="up"></i><b class="good">+6.4</b></div>
+            <div class="factor"><span>Internships</span><i style="--w: 52%" class="up"></i><b class="good">+3.9</b></div>
+            <div class="factor"><span>Communication</span><i style="--w: 34%" class="down"></i><b class="bad">-2.6</b></div>
+          </div>
+        </div>
+      </article>
+      <article class="bento__card bento__card--gap">
+        <span class="list-icon list-icon--gold">{{ icon('layers') }}</span>
+        <h3>Skill gap analysis</h3>
+        <p>Compare aptitude, coding, communication and technical scores with hiring targets and get a ranked fix list.</p>
+      </article>
+      <article class="bento__card bento__card--elig">
+        <span class="list-icon list-icon--success">{{ icon('building') }}</span>
+        <h3>Company eligibility</h3>
+        <p>See exactly which employers you qualify for, and the one requirement stopping you from the rest.</p>
+      </article>
+      <article class="bento__card bento__card--resume">
+        <span class="list-icon">{{ icon('file') }}</span>
+        <h3>Resume analyzer</h3>
+        <p>Upload a PDF for a section-by-section score and detected skills.</p>
+      </article>
+      <article class="bento__card bento__card--interview">
+        <span class="list-icon list-icon--gold">{{ icon('mic') }}</span>
+        <h3>Mock interviews</h3>
+        <p>Timed technical, HR and aptitude rounds with instant keyword feedback.</p>
+      </article>
+      <article class="bento__card bento__card--road">
+        <span class="list-icon list-icon--success">{{ icon('map') }}</span>
+        <h3>Roadmap and certifications</h3>
+        <p>A six-month plan and the certifications that match your gaps.</p>
+      </article>
+    </div>
+  </div>
+</section>
 
-    </header>
+<section class="section section--tint" id="how">
+  <div class="section__inner">
+    <div class="section__head"><h2>From first login to first offer in three steps</h2></div>
+    <ol class="steps">
+      <li><span class="steps__n serif">1</span><h3>Add your scores</h3><p>Enter CGPA, attendance, skill scores and the skills you already have. It takes about two minutes.</p></li>
+      <li><span class="steps__n serif">2</span><h3>Read your analysis</h3><p>Get a probability, a readiness score, a skill gap and a list of companies you already qualify for.</p></li>
+      <li><span class="steps__n serif">3</span><h3>Act on the plan</h3><p>Apply to open drives, practise interviews, fix your resume and watch your numbers improve.</p></li>
+    </ol>
+  </div>
+</section>
 
+<section class="section" id="workspaces">
+  <div class="section__inner">
+    <div class="section__head"><h2>One platform, three workspaces</h2><p class="muted">Each role sees what it needs and nothing more.</p></div>
+    <div class="roles">
+      <div class="role-tabs" role="tablist" data-tabs>
+        <button class="role-tab is-active" data-tab="student" role="tab" type="button">{{ icon('graduation') }}<span><strong>Students</strong><small>Know where you stand</small></span></button>
+        <button class="role-tab" data-tab="tpo" role="tab" type="button">{{ icon('briefcase') }}<span><strong>Placement officers</strong><small>Run drives with data</small></span></button>
+        <button class="role-tab" data-tab="admin" role="tab" type="button">{{ icon('settings') }}<span><strong>Administrators</strong><small>Own the model and records</small></span></button>
+      </div>
+      <div class="role-panel card" data-panel="student">
+        <h3>Your own placement coach</h3>
+        <ul class="checks"><li>{{ icon('check-circle') }}Placement probability with the factors behind it</li><li>{{ icon('check-circle') }}Readiness score, skill gap and certification advice</li><li>{{ icon('check-circle') }}Apply to drives you qualify for and track each stage</li><li>{{ icon('check-circle') }}Downloadable PDF placement report</li></ul>
+      </div>
+      <div class="role-panel card" data-panel="tpo" hidden>
+        <h3>Decide with the whole batch in view</h3>
+        <ul class="checks"><li>{{ icon('check-circle') }}Eligible and near-eligible students for any company</li><li>{{ icon('check-circle') }}Create drives and notify qualified students automatically</li><li>{{ icon('check-circle') }}Move applicants from applied to selected, with placements recorded</li><li>{{ icon('check-circle') }}Branch-wise statistics and Excel exports</li></ul>
+      </div>
+      <div class="role-panel card" data-panel="admin" hidden>
+        <h3>Keep the data and model honest</h3>
+        <ul class="checks"><li>{{ icon('check-circle') }}Manage students, companies and hiring criteria</li><li>{{ icon('check-circle') }}Upload placement datasets and retrain with one click</li><li>{{ icon('check-circle') }}Compare algorithms and review accuracy, recall and importance</li><li>{{ icon('check-circle') }}Institute-wide analytics and reports</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Main Content -->
+{% if model %}
+<section class="section">
+  <div class="section__inner">
+    <div class="trust panel-ink">
+      <div class="trust__copy">
+        <h2>A model you can inspect</h2>
+        <p class="muted">The active model is a {{ model.algorithm }} chosen by cross-validation against two alternatives. These figures come from data it never trained on. Colleges can upload their own records and retrain at any time.</p>
+        <a class="btn btn--on-ink mt-4" href="{{ url_for('main.about') }}">How predictions work</a>
+      </div>
+      <dl class="trust__metrics">
+        <div><dt class="serif num">{{ model.metrics.accuracy|num }}<small>%</small></dt><dd>Accuracy</dd></div>
+        <div><dt class="serif num">{{ model.metrics.precision|num }}<small>%</small></dt><dd>Precision</dd></div>
+        <div><dt class="serif num">{{ model.metrics.recall|num }}<small>%</small></dt><dd>Recall</dd></div>
+        <div><dt class="serif num">{{ model.metrics.roc_auc|num }}<small>%</small></dt><dd>ROC AUC</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+{% endif %}
 
-    <main class="hero">
-
-        <section class="hero-content">
-
-            <p class="badge">
-                AI • MACHINE LEARNING • CAREER INTELLIGENCE
-            </p>
-
-            <h1>
-                Student Placement Predictor
-            </h1>
-
-            <p class="subtitle">
-
-                An intelligent platform for placement prediction,
-                career readiness, skill-gap analysis and personalized
-                career recommendations.
-
-            </p>
-
-
-            <div class="buttons">
-
-                <a class="btn primary"
-                   href="/health"
-                   target="_blank">
-
-                    Test Backend
-
-                </a>
-
-
-                <a class="btn secondary"
-                   href="/db-test"
-                   target="_blank">
-
-                    Test Database
-
-                </a>
-
-            </div>
-
-        </section>
-
-
-        <!-- Feature Cards -->
-
-        <section class="cards">
-
-            <div class="card">
-
-                <h3>
-                    Placement Prediction
-                </h3>
-
-                <p>
-                    Machine Learning based placement prediction
-                    will be added in the upcoming development stages.
-                </p>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    Career Intelligence
-                </h3>
-
-                <p>
-                    Skill gaps, placement readiness and personalized
-                    career recommendations.
-                </p>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    Analytics
-                </h3>
-
-                <p>
-                    Student, placement and Training & Placement
-                    Officer analytics dashboards.
-                </p>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <!-- Footer -->
-
-    <footer>
-
-        <p>
-            Student_Placement_Predictor
-            • Final Year Project
-            • 2026
-        </p>
-
-    </footer>
-
-
-    <script src="{{ url_for('static', filename='js/main.js') }}">
-    </script>
-
-</body>
-
-</html>
+<section class="cta">
+  <div class="section__inner cta__inner">
+    <h2>Start with your scores. The rest follows.</h2>
+    <div class="row row--wrap" style="justify-content:center">
+      <a class="btn btn--primary btn--lg" href="{{ url_for('auth.register') }}">Create free account</a>
+      <a class="btn btn--secondary btn--lg" href="{{ url_for('main.contact') }}">Talk to us</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

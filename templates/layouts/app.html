@@ -1,0 +1,80 @@
+{% extends "layouts/base.html" %}
+{% from "partials/_macros.html" import icon, avatar %}
+{% block body_class %}is-app{% endblock %}
+{% block body %}
+<div class="app">
+  <aside class="rail" id="rail" aria-label="Main navigation">
+    <a class="rail__brand" href="{{ url_for('main.index') }}">
+      <span class="brand-mark">{{ icon('logo') }}</span>
+      <span class="brand-name">Placement Predictor<small>Student career intelligence</small></span>
+    </a>
+    <nav class="rail__scroll">{% include "partials/_nav.html" %}</nav>
+    <div class="rail__foot">
+      <div class="rail-user">
+        {{ avatar(current_user.name) }}
+        <div class="grow">
+          <div class="rail-user__name">{{ current_user.name }}</div>
+          <div class="rail-user__role">{{ 'Placement officer' if current_user.role == 'tpo' else current_user.role }}</div>
+        </div>
+        <a class="rail-user__out" href="{{ url_for('auth.logout') }}" title="Sign out" aria-label="Sign out">{{ icon('log-out') }}</a>
+      </div>
+    </div>
+  </aside>
+  <div class="scrim" data-rail-close></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn topbar__menu" type="button" data-rail-toggle aria-label="Open navigation">{{ icon('menu') }}</button>
+      <nav class="crumbs" aria-label="Breadcrumb">
+        {% block crumbs %}<strong>{{ self.title() }}</strong>{% endblock %}
+      </nav>
+      <div class="topbar__actions">
+        <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode">
+          <span class="i-moon">{{ icon('moon') }}</span><span class="i-sun">{{ icon('sun') }}</span>
+        </button>
+        <div class="menu" data-menu>
+          <button class="icon-btn" type="button" data-menu-trigger aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
+            {{ icon('bell') }}
+            {% if unread_count %}<span class="badge-dot" data-unread>{{ unread_count if unread_count < 10 else '9+' }}</span>{% endif %}
+          </button>
+          <div class="menu__panel notif-panel">
+            <div class="notif-panel__head">
+              <span>Notifications</span>
+              {% if unread_count %}
+              <form method="post" action="{{ url_for('notifications.read_all') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="link-btn text-sm" type="submit">Mark all read</button>
+              </form>{% endif %}
+            </div>
+            <div class="notif-list">
+              {% for n in recent_notifications %}
+              <a class="notif-item {{ 'is-unread' if not n.is_read }}" href="{{ url_for('notifications.open_item', notification_id=n.id, to=n.link or '') }}">
+                <span class="notif-item__icon">{{ icon({'drive': 'briefcase', 'success': 'check-circle'}.get(n.category, 'bell'), 'icon--sm') }}</span>
+                <span class="grow"><span class="notif-item__title">{{ n.title }}</span>
+                  <span class="notif-item__text">{{ n.message }}</span>
+                  <span class="notif-item__time">{{ n.created_at|time_ago }}</span></span>
+              </a>
+              {% else %}<div class="notif-empty">You are all caught up.</div>{% endfor %}
+            </div>
+            <a class="menu__item" href="{{ url_for('notifications.inbox') }}" style="justify-content:center;border-top:1px solid var(--line);border-radius:0 0 var(--r-lg) var(--r-lg)">View all notifications</a>
+          </div>
+        </div>
+        <div class="menu" data-menu>
+          <button class="user-trigger" type="button" data-menu-trigger aria-haspopup="true" aria-expanded="false">
+            {{ avatar(current_user.name) }}<span>{{ current_user.name.split()[0] }}</span>{{ icon('chevron-down', 'icon--sm') }}
+          </button>
+          <div class="menu__panel">
+            <div class="menu__head"><strong>{{ current_user.name }}</strong><div class="text-sm muted">{{ current_user.email }}</div></div>
+            {% if current_user.role == 'student' %}<a class="menu__item" href="{{ url_for('dashboard.profile') }}">{{ icon('user') }}Profile</a>{% endif %}
+            <a class="menu__item" href="{{ url_for('notifications.inbox') }}">{{ icon('bell') }}Notifications</a>
+            <a class="menu__item" href="{{ url_for('auth.logout') }}">{{ icon('log-out') }}Sign out</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page" id="main">{% block content %}{% endblock %}</main>
+    <footer class="app-footer"><span>&copy; {{ now_year }} Student Placement Predictor</span><span>Predictions are estimates based on historical placement data.</span></footer>
+  </div>
+</div>
+{% endblock %}

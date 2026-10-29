@@ -1,218 +1,27 @@
-# ==========================================================
-# STUDENT PLACEMENT PREDICTOR
-# ML MODEL EVALUATION
-# ==========================================================
+"""Evaluate the active model on the held-out split."""
+from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
+                             precision_score, recall_score)
 
-import os
-import joblib
+from ml.model_loader import load_model
+from ml.preprocessing import prepare_data
 
-from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    confusion_matrix,
-    classification_report
-)
-
-from preprocessing import prepare_data
-
-
-# ==========================================================
-# PATH CONFIGURATION
-# ==========================================================
-
-BASE_DIR = os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
-)
-
-MODEL_PATH = os.path.join(
-    BASE_DIR,
-    "ml",
-    "models",
-    "placement_model.pkl"
-)
-
-
-# ==========================================================
-# EVALUATE MODEL
-# ==========================================================
 
 def evaluate_model():
-
-    print(
-        "=========================================="
-    )
-
-    print(
-        "PLACEMENT MODEL EVALUATION"
-    )
-
-    print(
-        "=========================================="
-    )
-
-
-    # ------------------------------------------------------
-    # Check model
-    # ------------------------------------------------------
-
-    if not os.path.exists(MODEL_PATH):
-
-        raise FileNotFoundError(
-            "Trained model not found. "
-            "Run train_model.py first."
-        )
-
-
-    # ------------------------------------------------------
-    # Prepare test data
-    # ------------------------------------------------------
-
-    (
-        X_train,
-        X_test,
-        y_train,
-        y_test
-    ) = prepare_data()
-
-
-    # ------------------------------------------------------
-    # Load model
-    # ------------------------------------------------------
-
-    model = joblib.load(
-        MODEL_PATH
-    )
-
-
-    # ------------------------------------------------------
-    # Make predictions
-    # ------------------------------------------------------
-
-    y_pred = model.predict(
-        X_test
-    )
-
-
-    # ------------------------------------------------------
-    # Calculate metrics
-    # ------------------------------------------------------
-
-    accuracy = accuracy_score(
-        y_test,
-        y_pred
-    )
-
-    precision = precision_score(
-        y_test,
-        y_pred,
-        zero_division=0
-    )
-
-    recall = recall_score(
-        y_test,
-        y_pred,
-        zero_division=0
-    )
-
-    f1 = f1_score(
-        y_test,
-        y_pred,
-        zero_division=0
-    )
-
-
-    # ------------------------------------------------------
-    # Display metrics
-    # ------------------------------------------------------
-
-    print(
-        f"Accuracy  : {accuracy * 100:.2f}%"
-    )
-
-    print(
-        f"Precision : {precision * 100:.2f}%"
-    )
-
-    print(
-        f"Recall    : {recall * 100:.2f}%"
-    )
-
-    print(
-        f"F1 Score  : {f1 * 100:.2f}%"
-    )
-
-
-    # ------------------------------------------------------
-    # Classification report
-    # ------------------------------------------------------
-
-    print(
-        "\nClassification Report:"
-    )
-
-    print(
-        classification_report(
-            y_test,
-            y_pred,
-            zero_division=0
-        )
-    )
-
-
-    # ------------------------------------------------------
-    # Confusion matrix
-    # ------------------------------------------------------
-
-    print(
-        "Confusion Matrix:"
-    )
-
-    print(
-        confusion_matrix(
-            y_test,
-            y_pred
-        )
-    )
-
-
-    print(
-        "=========================================="
-    )
-
-    print(
-        "MODEL EVALUATION COMPLETED"
-    )
-
-    print(
-        "=========================================="
-    )
-
-
+    pipeline, meta = load_model()
+    _, X_test, _, y_test, _, _ = prepare_data()
+    X_test = X_test.reindex(columns=meta["features"])
+    pred = pipeline.predict(X_test)
     return {
-        "accuracy": accuracy,
-        "precision": precision,
-        "recall": recall,
-        "f1_score": f1
+        "accuracy": round(accuracy_score(y_test, pred) * 100, 2),
+        "precision": round(precision_score(y_test, pred, zero_division=0) * 100, 2),
+        "recall": round(recall_score(y_test, pred, zero_division=0) * 100, 2),
+        "f1": round(f1_score(y_test, pred, zero_division=0) * 100, 2),
+        "confusion_matrix": confusion_matrix(y_test, pred).tolist(),
+        "note": "Evaluated on rows the deployed model has also seen; "
+                "use metadata metrics for the unbiased holdout estimate.",
     }
 
 
-# ==========================================================
-# MAIN
-# ==========================================================
-
 if __name__ == "__main__":
-
-    try:
-
-        evaluate_model()
-
-    except Exception as error:
-
-        print(
-            "Evaluation Error:",
-            error
-        )
+    for key, value in evaluate_model().items():
+        print(f"{key}: {value}")

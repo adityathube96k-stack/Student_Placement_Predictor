@@ -1,515 +1,77 @@
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-    redirect,
-    url_for,
-    flash,
-    session
-)
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from database.db import get_connection
+from analytics.dashboard_stats import student_overview
+from analytics.student_analytics import progress_timeline, skill_radar
+from company_eligibility.eligibility_checker import check_student, get_eligible_companies
+from models.company import Drive
+from models.student import SCORE_FIELDS, Student
+from models.user import User
+from routes._common import get_student, parse_profile, user_id
+from utils.constants import BRANCHES, SKILL_SUGGESTIONS, YEARS
+from utils.decorators import student_required
+from utils.helpers import split_skills
+from utils.validators import validate_email, validate_name, validate_phone
 
-
-dashboard_bp = Blueprint(
-    "dashboard",
-    __name__,
-    url_prefix="/student"
-)
+dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/student")
 
 
-# ==========================================================
-# STUDENT DASHBOARD
-# ==========================================================
+def _next_steps(student, overview, eligible, open_drives):
+    steps = []
+    if overview["completeness"] < 100:
+        steps.append({"title": "Complete your profile", "text": f"{overview['completeness']}% done. Scores and skills power every analysis.",
+                      "endpoint": "dashboard.profile", "icon": "user"})
+    if Student.has_scores(student) and not overview["prediction"]:
+        steps.append({"title": "Run your first prediction", "text": "See your placement probability and what drives it.",
+                      "endpoint": "prediction.prediction", "icon": "target"})
+    if not overview["resume"]:
+        steps.append({"title": "Upload your resume", "text": "Get an ATS-style score and fix gaps before applying.",
+                      "endpoint": "resume.resume_upload", "icon": "file"})
+    if not overview["interview"]:
+        steps.append({"title": "Take a mock interview", "text": "Practise with timed questions and instant feedback.",
+                      "endpoint": "interview.mock_interview", "icon": "mic"})
+    if eligible and open_drives:
+        steps.append({"title": f"Apply to {len(open_drives)} open drive(s)", "text": "You meet the criteria for companies hiring now.",
+                      "endpoint": "company.drives", "icon": "briefcase"})
+    if Student.has_scores(student):
+        steps.append({"title": "Review your skill gap", "text": "Find the weakest area and a plan to close it.",
+                      "endpoint": "skill_gap.skill_gap", "icon": "layers"})
+    return steps[:4]
+
 
 @dashboard_bp.route("/dashboard")
+@student_required
 def dashboard():
-
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
-
-    if session.get("role") != "student":
-        flash("Access denied.", "error")
-        return redirect(url_for("auth.login"))
-
-    connection = None
-
-    try:
-
-        connection = get_connection()
-
-        with connection.cursor() as cursor:
-
-            cursor.execute(
-                """
-                SELECT
-                    u.full_name,
-                    u.email,
-
-                    s.enrollment_no,
-                    s.phone,
-                    s.branch,
-                    s.year,
-
-                    s.cgpa,
-                    s.attendance,
-                    s.aptitude_score,
-                    s.coding_score,
-                    s.communication_score,
-                    s.technical_score,
-
-                    s.skills
-
-                FROM users u
-
-                JOIN students s
-                    ON u.id = s.user_id
-
-                WHERE u.id = %s
-                """,
-                (session["user_id"],)
-            )
-
-            student = cursor.fetchone()
-
-        return render_template(
-            "student/dashboard.html",
-            student=student
-        )
-
-    except Exception as error:
-
-        print("Dashboard Error:", error)
-
-        flash(
-            "Unable to load dashboard.",
-            "error"
-        )
-
-        return redirect(
-            url_for("auth.login")
-        )
-
-    finally:
-
-        if connection:
-            connection.close()
+    student = get_student()
+    overview = student_overview(user_id(), student)
+    eligible, open_drives = [], Drive.open_drives()[:3]
+    if Student.has_scores(student):
+        eligible = get_eligible_companies(check_student(student))
+    return render_template(
+        "student/dashboard.html", student=student, overview=overview,
+        timeline=progress_timeline(user_id()), radar=skill_radar(student),
+        eligible_count=len(eligible), eligible_preview=eligible[:4], open_drives=open_drives,
+        next_steps=_next_steps(student, overview, eligible, open_drives))
 
 
-# ==========================================================
-# STUDENT PROFILE
-# ==========================================================
-
-@dashboard_bp.route(
-    "/profile",
-    methods=["GET", "POST"]
-)
+@dashboard_bp.route("/profile", methods=["GET", "POST"])
+@student_required
 def profile():
-
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
-
-    if session.get("role") != "student":
-        flash("Access denied.", "error")
-        return redirect(url_for("auth.login"))
-
-    connection = None
-
-    # ======================================================
-    # UPDATE PROFILE
-    # ======================================================
-
+    student = get_student()
     if request.method == "POST":
-
-        enrollment_no = request.form.get(
-            "enrollment_no",
-            ""
-        ).strip()
-
-        phone = request.form.get(
-            "phone",
-            ""
-        ).strip()
-
-        branch = request.form.get(
-            "branch",
-            ""
-        ).strip()
-
-        year = request.form.get(
-            "year",
-            ""
-        ).strip()
-
-        cgpa = request.form.get(
-            "cgpa",
-            ""
-        ).strip()
-
-        attendance = request.form.get(
-            "attendance",
-            ""
-        ).strip()
-
-        aptitude_score = request.form.get(
-            "aptitude_score",
-            ""
-        ).strip()
-
-        coding_score = request.form.get(
-            "coding_score",
-            ""
-        ).strip()
-
-        communication_score = request.form.get(
-            "communication_score",
-            ""
-        ).strip()
-
-        technical_score = request.form.get(
-            "technical_score",
-            ""
-        ).strip()
-
-        skills = request.form.get(
-            "skills",
-            ""
-        ).strip()
-
-        # ==================================================
-        # BASIC VALIDATION
-        # ==================================================
-
-        if not enrollment_no:
-
-            flash(
-                "Enrollment number is required.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        if not branch:
-
-            flash(
-                "Branch is required.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        if not year:
-
-            flash(
-                "Please select your year.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        # ==================================================
-        # ACADEMIC VALIDATION
-        # ==================================================
-
-        if not cgpa:
-
-            flash(
-                "CGPA is required.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        if not attendance:
-
-            flash(
-                "Attendance is required.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        # ==================================================
-        # SKILL SCORE VALIDATION
-        # ==================================================
-
-        if not aptitude_score:
-
-            flash(
-                "Aptitude score is required.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        if not coding_score:
-
-            flash(
-                "Coding score is required.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        if not communication_score:
-
-            flash(
-                "Communication score is required.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        if not technical_score:
-
-            flash(
-                "Technical score is required.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        # ==================================================
-        # NUMERIC VALIDATION
-        # ==================================================
-
+        form = request.form
         try:
-
-            cgpa_value = float(cgpa)
-            attendance_value = float(attendance)
-
-            aptitude_value = float(
-                aptitude_score
-            )
-
-            coding_value = float(
-                coding_score
-            )
-
-            communication_value = float(
-                communication_score
-            )
-
-            technical_value = float(
-                technical_score
-            )
-
-        except ValueError:
-
-            flash(
-                "Please enter valid numeric values for academic and skill scores.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        # ==================================================
-        # RANGE VALIDATION
-        # ==================================================
-
-        if not 0 <= cgpa_value <= 10:
-
-            flash(
-                "CGPA must be between 0 and 10.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        score_values = [
-            attendance_value,
-            aptitude_value,
-            coding_value,
-            communication_value,
-            technical_value
-        ]
-
-        if any(
-            score < 0 or score > 100
-            for score in score_values
-        ):
-
-            flash(
-                "Attendance and skill scores must be between 0 and 100.",
-                "error"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        # ==================================================
-        # SAVE PROFILE
-        # ==================================================
-
-        try:
-
-            connection = get_connection()
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    """
-                    UPDATE students
-
-                    SET
-                        enrollment_no = %s,
-                        phone = %s,
-                        branch = %s,
-                        year = %s,
-
-                        cgpa = %s,
-                        attendance = %s,
-
-                        aptitude_score = %s,
-                        coding_score = %s,
-                        communication_score = %s,
-                        technical_score = %s,
-
-                        skills = %s
-
-                    WHERE user_id = %s
-                    """,
-
-                    (
-                        enrollment_no,
-                        phone,
-                        branch,
-                        year,
-
-                        cgpa_value,
-                        attendance_value,
-
-                        aptitude_value,
-                        coding_value,
-                        communication_value,
-                        technical_value,
-
-                        skills or None,
-
-                        session["user_id"]
-                    )
-                )
-
-            connection.commit()
-
-            flash(
-                "Profile updated successfully!",
-                "success"
-            )
-
-            return redirect(
-                url_for("dashboard.profile")
-            )
-
-        except Exception as error:
-
-            if connection:
-                connection.rollback()
-
-            print(
-                "Profile Update Error:",
-                error
-            )
-
-            flash(
-                "Unable to update profile.",
-                "error"
-            )
-
-        finally:
-
-            if connection:
-                connection.close()
-
-    # ======================================================
-    # LOAD PROFILE
-    # ======================================================
-
-    try:
-
-        connection = get_connection()
-
-        with connection.cursor() as cursor:
-
-            cursor.execute(
-                """
-                SELECT
-                    u.full_name,
-                    u.email,
-
-                    s.enrollment_no,
-                    s.phone,
-                    s.branch,
-                    s.year,
-
-                    s.cgpa,
-                    s.attendance,
-
-                    s.aptitude_score,
-                    s.coding_score,
-                    s.communication_score,
-                    s.technical_score,
-
-                    s.skills
-
-                FROM users u
-
-                JOIN students s
-                    ON u.id = s.user_id
-
-                WHERE u.id = %s
-                """,
-
-                (session["user_id"],)
-            )
-
-            student = cursor.fetchone()
-
-        return render_template(
-            "student/profile.html",
-            student=student
-        )
-
-    except Exception as error:
-
-        print(
-            "Profile Error:",
-            error
-        )
-
-        flash(
-            "Unable to load profile.",
-            "error"
-        )
-
-        return redirect(
-            url_for("dashboard.dashboard")
-        )
-
-    finally:
-
-        if connection:
-            connection.close()
+            user_fields, data = parse_profile(form, user_id())
+        except ValueError as error:
+            flash(str(error), "danger")
+            merged = dict(student or {}, **form.to_dict())
+            return render_template("student/profile.html", student=merged, branches=BRANCHES, years=YEARS,
+                                   suggestions=SKILL_SUGGESTIONS, completeness=Student.completeness(student)), 400
+        name, email = user_fields["full_name"], user_fields["email"]
+        User.update_name_email(user_id(), name, email)
+        Student.update_profile(user_id(), data)
+        from flask import session
+        session["full_name"], session["email"] = name, email
+        flash("Profile saved.", "success")
+        return redirect(url_for("dashboard.profile"))
+    return render_template("student/profile.html", student=student, branches=BRANCHES, years=YEARS,
+                           suggestions=SKILL_SUGGESTIONS, completeness=Student.completeness(student))

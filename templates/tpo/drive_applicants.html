@@ -1,0 +1,15 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, csrf, badge, avatar, empty %}
+{% block title %}Applicants{% endblock %}
+{% block crumbs %}<a class="crumb-parent" href="{{ url_for('tpo.company_drives') }}">Company drives</a>{{ icon('chevron-right') }}<strong>{{ drive.company_name }}</strong>{% endblock %}
+{% block content %}
+{% call page_head(drive.company_name ~ ': ' ~ drive.job_role, (drive.drive_date|fmt_date('%d %b %Y')) ~ ' · ' ~ drive.openings ~ ' openings · ' ~ (drive.package_lpa|num) ~ ' LPA') %}{{ badge(drive.status) }}<a class="btn btn--secondary" href="{{ url_for('tpo.drive_edit', drive_id=drive.id) }}">{{ icon('edit') }} Edit drive</a>{% endcall %}
+<section class="card">
+  {% if applicants %}<div class="table-wrap"><table class="table"><thead><tr><th>Student</th><th>Branch</th><th class="right">CGPA</th><th class="right">Coding</th><th>Applied</th><th>Stage</th><th>Update stage</th></tr></thead>
+    <tbody>{% for a in applicants %}<tr>
+      <td><div class="cell-person">{{ avatar(a.full_name) }}<div><strong>{{ a.full_name }}</strong><span>{{ a.enrollment_no or a.email }}</span></div></div></td><td>{{ a.branch or '-' }}</td><td class="right num">{{ a.cgpa|num }}</td><td class="right num">{{ a.coding_score|num }}</td><td class="nowrap muted">{{ a.applied_at|fmt_date('%d %b') }}</td><td>{{ badge(a.status) }}</td>
+      <td><form class="row" method="post" action="{{ url_for('tpo.application_status', application_id=a.application_id) }}">{{ csrf() }}<select class="select" name="status" style="min-width:9rem;height:2.1rem" aria-label="Stage for {{ a.full_name }}">{% for s in statuses %}<option {{ 'selected' if s == a.status }}>{{ s }}</option>{% endfor %}</select><button class="btn btn--secondary btn--sm" type="submit">Save</button></form></td></tr>{% endfor %}</tbody></table></div>
+  {% else %}{{ empty('users', 'No applicants yet', 'Students who apply from their drives page will appear here.') }}{% endif %}
+</section>
+<div class="alert mt-4">{{ icon('info') }}<div>Marking an applicant <strong>Selected</strong> records the placement on their profile and notifies them. Changing it later reverses the placement.</div></div>
+{% endblock %}

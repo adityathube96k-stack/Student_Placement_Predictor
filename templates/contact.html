@@ -1,0 +1,32 @@
+{% extends "layouts/public.html" %}
+{% from "partials/_macros.html" import icon, csrf %}
+{% block title %}Contact · {{ app_name }}{% endblock %}
+{% block content %}
+<section class="section section--first">
+  <div class="section__inner">
+    <div class="contact">
+      <div>
+        <h1 class="serif page-title">Talk to the placement team</h1>
+        <p class="lead">Questions about accounts, drives or bringing the platform to your college? Send a note and we will reply by email.</p>
+        <ul class="contact__list">
+          <li><span class="list-icon">{{ icon('mail') }}</span><div><strong>Email</strong><div class="muted">placement@college.edu</div></div></li>
+          <li><span class="list-icon">{{ icon('phone') }}</span><div><strong>Phone</strong><div class="muted">+91 253 000 0000</div></div></li>
+          <li><span class="list-icon">{{ icon('clock') }}</span><div><strong>Office hours</strong><div class="muted">Monday to Saturday, 10:00 to 17:00</div></div></li>
+        </ul>
+      </div>
+      <form class="card" method="post" data-loading novalidate>
+        {{ csrf() }}
+        <div class="form-section">
+          <div class="form-grid">
+            <div class="field"><label class="label" for="name">Name</label><input class="input" id="name" name="name" value="{{ form.get('name', '') }}" required></div>
+            <div class="field"><label class="label" for="email">Email</label><input class="input" id="email" name="email" type="email" value="{{ form.get('email', '') }}" required></div>
+            <div class="field span-2"><label class="label" for="subject">Subject <span class="opt">Optional</span></label><input class="input" id="subject" name="subject" value="{{ form.get('subject', '') }}"></div>
+            <div class="field span-2"><label class="label" for="message">Message</label><textarea class="textarea" id="message" name="message" rows="6" required minlength="10">{{ form.get('message', '') }}</textarea></div>
+          </div>
+        </div>
+        <div class="form-actions"><button class="btn btn--primary" type="submit">{{ icon('send') }} Send message</button></div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

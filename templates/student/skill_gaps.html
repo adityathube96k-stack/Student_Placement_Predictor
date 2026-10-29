@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Skill Gaps | Placement AI{% endblock %}
+
+{% block page_title %}
+Skill Gaps
+{% endblock %}
+
+{% block page_subtitle %}
+Identify the skills that need improvement for better placement readiness.
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="prediction-page">
+
+    <!-- Page Introduction -->
+    <div class="welcome-card">
+
+        <h2>
+            Skill Gap Analysis 📈
+        </h2>
+
+        <p>
+            Review the skills that need improvement based on your
+            latest AI placement prediction. Focus on high-priority
+            areas to improve your employability and placement readiness.
+        </p>
+
+    </div>
+
+
+    <!-- Skill Gap Results -->
+    <div class="dashboard-card">
+
+        <div class="card-header">
+
+            <div>
+                <h3>
+                    Your Skill Gaps
+                </h3>
+
+                <p>
+                    Areas where you can improve your performance.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div id="skillGapsContainer">
+
+            <div class="empty-state">
+                Loading skill gap analysis...
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Improvement Summary -->
+    <div class="dashboard-card">
+
+        <div class="card-header">
+
+            <div>
+                <h3>
+                    Improvement Summary
+                </h3>
+
+                <p>
+                    Recommended target for your identified skill gaps.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="prediction-result-grid">
+
+            <div class="result-box">
+
+                <span>
+                    High Priority
+                </span>
+
+                <strong id="highPriorityCount">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <span>
+                    Medium Priority
+                </span>
+
+                <strong id="mediumPriorityCount">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <span>
+                    Target Score
+                </span>
+
+                <strong>
+                    80
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Action -->
+    <div class="dashboard-card">
+
+        <div class="card-header">
+
+            <div>
+
+                <h3>
+                    Improve Your Skills 🚀
+                </h3>
+
+                <p>
+                    Generate a new prediction after improving
+                    your identified skill gaps.
+                </p>
+
+            </div>
+
+            <a href="/prediction"
+               class="primary-btn">
+                New Prediction
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for('static', filename='js/skill_gaps.js') }}"></script>
+
+{% endblock %}

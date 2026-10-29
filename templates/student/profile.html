@@ -1,513 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>My Profile | Student Placement Predictor</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/dashboard.css') }}">
-
-    <style>
-
-        /* ==================================================
-           SKILLS INPUT
-        =================================================== */
-
-        .skills-input {
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .skills-helper {
-            display: block;
-            margin-top: 6px;
-            color: #666;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-    <!-- ==================================================
-         NAVBAR
-    =================================================== -->
-
-    <nav class="navbar">
-
-        <div class="logo">
-            Student Placement Predictor
-        </div>
-
-        <div class="nav-links">
-
-            <a href="{{ url_for('dashboard.dashboard') }}">
-                Dashboard
-            </a>
-
-            <a href="{{ url_for('dashboard.profile') }}">
-                My Profile
-            </a>
-
-            <a href="{{ url_for('auth.logout') }}">
-                Logout
-            </a>
-
-        </div>
-
-    </nav>
-
-
-    <!-- ==================================================
-         MAIN CONTENT
-    =================================================== -->
-
-    <main class="container">
-
-        <section class="form-card">
-
-            <h1>
-                My Student Profile
-            </h1>
-
-            <p>
-                Enter your academic and skill information.
-            </p>
-
-
-            <!-- ==================================================
-                 FLASH MESSAGES
-            =================================================== -->
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-
-                {% if messages %}
-
-                    {% for category, message in messages %}
-
-                        <div class="alert {{ category }}">
-                            {{ message }}
-                        </div>
-
-                    {% endfor %}
-
-                {% endif %}
-
-            {% endwith %}
-
-
-            <!-- ==================================================
-                 PROFILE FORM
-            =================================================== -->
-
-            <form
-                method="POST"
-                action="{{ url_for('dashboard.profile') }}"
-            >
-
-
-                <!-- ==================================================
-                     PERSONAL INFORMATION
-                =================================================== -->
-
-                <h2>
-                    Personal Information
-                </h2>
-
-                <div class="form-grid">
-
-
-                    <!-- FULL NAME -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Full Name
-                        </label>
-
-                        <input
-                            type="text"
-                            value="{{ student.full_name }}"
-                            readonly
-                        >
-
-                    </div>
-
-
-                    <!-- EMAIL -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            value="{{ student.email }}"
-                            readonly
-                        >
-
-                    </div>
-
-
-                    <!-- ENROLLMENT NUMBER -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Enrollment Number *
-                        </label>
-
-                        <input
-                            type="text"
-                            name="enrollment_no"
-                            value="{{ student.enrollment_no or '' }}"
-                            placeholder="Enter enrollment number"
-                            required
-                        >
-
-                    </div>
-
-
-                    <!-- PHONE -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Phone Number
-                        </label>
-
-                        <input
-                            type="text"
-                            name="phone"
-                            value="{{ student.phone or '' }}"
-                            placeholder="Enter phone number"
-                        >
-
-                    </div>
-
-
-                    <!-- BRANCH -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Branch *
-                        </label>
-
-                        <input
-                            type="text"
-                            name="branch"
-                            value="{{ student.branch or '' }}"
-                            placeholder="Information Technology"
-                            required
-                        >
-
-                    </div>
-
-
-                    <!-- YEAR -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Year
-                        </label>
-
-                        <select name="year">
-
-                            <option value="">
-                                Select Year
-                            </option>
-
-                            <option
-                                value="1"
-                                {% if student.year == 1 %}
-                                    selected
-                                {% endif %}
-                            >
-                                First Year
-                            </option>
-
-                            <option
-                                value="2"
-                                {% if student.year == 2 %}
-                                    selected
-                                {% endif %}
-                            >
-                                Second Year
-                            </option>
-
-                            <option
-                                value="3"
-                                {% if student.year == 3 %}
-                                    selected
-                                {% endif %}
-                            >
-                                Third Year
-                            </option>
-
-                            <option
-                                value="4"
-                                {% if student.year == 4 %}
-                                    selected
-                                {% endif %}
-                            >
-                                Fourth Year
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-                <!-- ==================================================
-                     ACADEMIC INFORMATION
-                =================================================== -->
-
-                <h2>
-                    Academic Information
-                </h2>
-
-                <div class="form-grid">
-
-
-                    <!-- CGPA -->
-
-                    <div class="form-group">
-
-                        <label>
-                            CGPA
-                        </label>
-
-                        <input
-                            type="number"
-                            name="cgpa"
-                            step="0.01"
-                            min="0"
-                            max="10"
-                            value="{{ student.cgpa or '' }}"
-                            placeholder="Example: 8.25"
-                        >
-
-                    </div>
-
-
-                    <!-- ATTENDANCE -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Attendance (%)
-                        </label>
-
-                        <input
-                            type="number"
-                            name="attendance"
-                            step="0.01"
-                            min="0"
-                            max="100"
-                            value="{{ student.attendance or '' }}"
-                            placeholder="Example: 85"
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <!-- ==================================================
-                     SKILL SCORES
-                =================================================== -->
-
-                <h2>
-                    Skill Scores
-                </h2>
-
-                <p class="helper-text">
-                    Enter scores from 0 to 100.
-                </p>
-
-
-                <div class="form-grid">
-
-
-                    <!-- APTITUDE -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Aptitude Score
-                        </label>
-
-                        <input
-                            type="number"
-                            name="aptitude_score"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            value="{{ student.aptitude_score or '' }}"
-                            placeholder="Example: 75"
-                        >
-
-                    </div>
-
-
-                    <!-- CODING -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Coding Score
-                        </label>
-
-                        <input
-                            type="number"
-                            name="coding_score"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            value="{{ student.coding_score or '' }}"
-                            placeholder="Example: 80"
-                        >
-
-                    </div>
-
-
-                    <!-- COMMUNICATION -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Communication Score
-                        </label>
-
-                        <input
-                            type="number"
-                            name="communication_score"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            value="{{ student.communication_score or '' }}"
-                            placeholder="Example: 78"
-                        >
-
-                    </div>
-
-
-                    <!-- TECHNICAL -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Technical Score
-                        </label>
-
-                        <input
-                            type="number"
-                            name="technical_score"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            value="{{ student.technical_score or '' }}"
-                            placeholder="Example: 82"
-                        >
-
-                    </div>
-
-
-                    <!-- ==================================================
-                         STUDENT SKILLS
-                    =================================================== -->
-
-                    <div class="form-group">
-
-                        <label for="skills">
-                            Skills
-                        </label>
-
-                        <input
-                            type="text"
-                            id="skills"
-                            name="skills"
-                            class="skills-input"
-                            value="{{ student.skills or '' }}"
-                            placeholder="Python, SQL, Data Structures, Git, HTML, CSS, JavaScript"
-                        >
-
-                        <small class="skills-helper">
-                            Enter your skills separated by commas.
-                            Example: Python, SQL, Git, JavaScript, React
-                        </small>
-
-                    </div>
-
-
-                </div>
-
-
-                <!-- ==================================================
-                     BUTTONS
-                =================================================== -->
-
-                <div class="form-actions">
-
-                    <button
-                        type="submit"
-                        class="btn primary"
-                    >
-                        Save Profile
-                    </button>
-
-
-                    <a
-                        href="{{ url_for('dashboard.dashboard') }}"
-                        class="btn secondary"
-                    >
-                        Cancel
-                    </a>
-
-                </div>
-
-
-            </form>
-
-        </section>
-
-    </main>
-
-
-    <!-- ==================================================
-         FOOTER
-    =================================================== -->
-
-    <footer class="footer">
-
-        <p>
-            © 2026 Student Placement Predictor
-        </p>
-
-        <p>
-            AI-Powered Career & Placement Intelligence System
-        </p>
-
-    </footer>
-
-
-</body>
-
-</html>
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, csrf, input, number, slider, select, meter %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+{{ page_head('Your profile', 'Scores and skills here power your prediction, readiness, skill gap and eligibility.') }}
+{% set checks = [('enrollment_no', 'Enrollment number'), ('phone', 'Phone'), ('branch', 'Branch'), ('year', 'Year'), ('cgpa', 'CGPA'), ('attendance', 'Attendance'), ('aptitude_score', 'Aptitude score'), ('coding_score', 'Coding score'), ('communication_score', 'Communication score'), ('technical_score', 'Technical score'), ('skills', 'Skills')] %}
+<form method="post" class="grid grid--main profile-layout" data-loading novalidate>
+  {{ csrf() }}
+  <div class="card">
+    <section class="form-section">
+      <h3>Personal details</h3><p>Used on reports and visible to your placement officer.</p>
+      <div class="form-grid">
+        {{ input('full_name', 'Full name', student.get('full_name'), required=True) }}
+        {{ input('email', 'Email', student.get('email'), 'email', required=True) }}
+        {{ input('phone', 'Phone', student.get('phone'), 'tel', placeholder='+91 98765 43210') }}
+        {{ input('enrollment_no', 'Enrollment number', student.get('enrollment_no')) }}
+      </div>
+    </section>
+    <section class="form-section">
+      <h3>Academics</h3><p>Copy these from your latest marksheet and attendance record.</p>
+      <div class="form-grid form-grid--3">
+        {{ select('branch', 'Branch', branches, student.get('branch')) }}
+        {{ select('year', 'Year', years, student.get('year')) }}
+        {{ number('backlogs', 'Active backlogs', student.get('backlogs', 0), 0, 30, 1) }}
+        {{ number('cgpa', 'CGPA (out of 10)', student.get('cgpa'), 0, 10, 0.01) }}
+        {{ number('attendance', 'Attendance %', student.get('attendance'), 0, 100, 0.1) }}
+      </div>
+    </section>
+    <section class="form-section">
+      <h3>Skill scores</h3><p>Use your latest test, assessment or mock-round percentages.</p>
+      <div class="form-grid">
+        {{ slider('aptitude_score', 'Aptitude', student.get('aptitude_score')) }}
+        {{ slider('coding_score', 'Coding', student.get('coding_score')) }}
+        {{ slider('communication_score', 'Communication', student.get('communication_score')) }}
+        {{ slider('technical_score', 'Technical', student.get('technical_score')) }}
+      </div>
+    </section>
+    <section class="form-section">
+      <h3>Experience</h3><p>Count work you can show to a recruiter.</p>
+      <div class="form-grid form-grid--3">
+        {{ number('projects', 'Projects', student.get('projects', 0), 0, 50, 1) }}
+        {{ number('internships', 'Internships', student.get('internships', 0), 0, 20, 1) }}
+        {{ number('certifications', 'Certifications', student.get('certifications', 0), 0, 50, 1) }}
+      </div>
+    </section>
+    <section class="form-section">
+      <h3>Skills</h3><p>Comma separated. Company eligibility matches these against required skills.</p>
+      <div class="field">
+        <textarea class="textarea" id="skills" name="skills" rows="3" placeholder="Python, SQL, React">{{ student.get('skills') or '' }}</textarea>
+        <div class="tag-list mt-2">{% for s in suggestions %}<button class="chip" type="button" data-chip-target="skills" data-chip-value="{{ s }}">{{ icon('plus') }}{{ s }}</button>{% endfor %}</div>
+      </div>
+    </section>
+    <div class="form-actions"><a class="btn btn--ghost" href="{{ url_for('dashboard.dashboard') }}">Cancel</a><button class="btn btn--primary" type="submit">{{ icon('check') }} Save profile</button></div>
+  </div>
+
+  <aside class="stack profile-aside">
+    <div class="card card__body">
+      <div class="row"><div class="progress-ring" style="--v: {{ completeness }}"><svg viewBox="0 0 60 60"><circle class="track" cx="30" cy="30" r="26"/><circle class="fill" cx="30" cy="30" r="26"/></svg><span>{{ completeness }}%</span></div>
+        <div><strong>Profile completeness</strong><div class="text-sm muted">{{ 'All set.' if completeness == 100 else 'Fill the remaining fields.' }}</div></div></div>
+      <ul class="checklist mt-4">
+        {% for key, label in checks %}{% set done = student.get(key) not in (none, '') %}
+        <li class="{{ 'is-done' if done }}">{{ icon('check-circle' if done else 'x-circle', 'icon--sm') }}{{ label }}</li>{% endfor %}
+      </ul>
+    </div>
+    <div class="alert">{{ icon('info') }}<div><strong>Be accurate.</strong> Predictions are only as good as the numbers you enter. Your placement officer can see this profile.</div></div>
+  </aside>
+</form>
+{% endblock %}
+{% block scripts %}{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "layouts/base.html" %}
+{% from "partials/_macros.html" import icon, dial %}
+{% block body_class %}is-auth{% endblock %}
+{% block body %}
+<div class="auth">
+  <aside class="auth__brand panel-ink">
+    <a class="site-brand site-brand--light" href="{{ url_for('main.index') }}"><span class="brand-mark">{{ icon('logo') }}</span><span>Placement Predictor</span></a>
+    <div class="auth__pitch">
+      <h2>{% block pitch_title %}Know where you stand before placement season starts.{% endblock %}</h2>
+      <p class="muted">{% block pitch_text %}Turn marks, skills and resume into a placement probability and a plan to improve it.{% endblock %}</p>
+      <ul class="auth__points">
+        <li>{{ icon('check-circle') }}<span>Placement probability with the factors behind it</span></li>
+        <li>{{ icon('check-circle') }}<span>Eligibility check against every hiring company</span></li>
+        <li>{{ icon('check-circle') }}<span>Resume scoring and timed mock interviews</span></li>
+      </ul>
+    </div>
+    <div class="auth__dial">{{ dial(78, 'Readiness', 'dial--sm', on_ink=True) }}<div><strong>Sample readiness</strong><span class="muted text-sm">A score out of 100 built from CGPA, attendance and four skill areas.</span></div></div>
+  </aside>
+  <section class="auth__form">
+    <div class="auth__card">
+      <div class="auth__top"><a class="link-btn text-sm" href="{{ url_for('main.index') }}">{{ icon('chevron-left', 'icon--sm') }} Back to home</a>
+        <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode"><span class="i-moon">{{ icon('moon') }}</span><span class="i-sun">{{ icon('sun') }}</span></button></div>
+      <main id="main">{% block content %}{% endblock %}</main>
+    </div>
+  </section>
+</div>
+{% endblock %}

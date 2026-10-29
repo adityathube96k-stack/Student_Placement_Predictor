@@ -1,0 +1,54 @@
+{# Role-aware navigation. `m` lists the endpoints that keep an item highlighted. #}
+{% set NAV = {
+ 'student': [
+  {'label': 'Overview', 'items': [
+    {'t': 'Dashboard', 'e': 'dashboard.dashboard', 'i': 'home', 'm': ['dashboard.dashboard']}]},
+  {'label': 'Placement', 'items': [
+    {'t': 'Prediction', 'e': 'prediction.prediction', 'i': 'target', 'm': ['prediction.prediction', 'prediction.prediction_history']},
+    {'t': 'Readiness score', 'e': 'readiness.readiness_score', 'i': 'activity', 'm': ['readiness.readiness_score', 'readiness.readiness_history']},
+    {'t': 'Skill gap', 'e': 'skill_gap.skill_gap', 'i': 'layers', 'm': ['skill_gap.skill_gap', 'skill_gap.skill_gap_history']},
+    {'t': 'Analytics', 'e': 'analytics.student_analytics', 'i': 'bar-chart', 'm': ['analytics.student_analytics']}]},
+  {'label': 'Career', 'items': [
+    {'t': 'Recommendations', 'e': 'recommendation.recommendations', 'i': 'zap', 'm': ['recommendation.recommendations']},
+    {'t': 'Roadmap', 'e': 'recommendation.roadmap', 'i': 'map', 'm': ['recommendation.roadmap']},
+    {'t': 'Certifications', 'e': 'recommendation.certifications', 'i': 'award', 'm': ['recommendation.certifications']},
+    {'t': 'Resume analyzer', 'e': 'resume.resume_upload', 'i': 'file', 'm': ['resume.resume_upload', 'resume.resume_result', 'resume.resume_history']}]},
+  {'label': 'Opportunities', 'items': [
+    {'t': 'Company eligibility', 'e': 'company.company_eligibility', 'i': 'building', 'm': ['company.company_eligibility', 'company.company_eligibility_history']},
+    {'t': 'Placement drives', 'e': 'company.drives', 'i': 'briefcase', 'm': ['company.drives']},
+    {'t': 'Mock interview', 'e': 'interview.mock_interview', 'i': 'mic', 'm': ['interview.mock_interview', 'interview.start_interview', 'interview.interview_result', 'interview.interview_history']}]},
+  {'label': 'Account', 'items': [
+    {'t': 'Reports', 'e': 'report.student_reports', 'i': 'download', 'm': ['report.student_reports']},
+    {'t': 'Profile', 'e': 'dashboard.profile', 'i': 'user', 'm': ['dashboard.profile']}]}],
+ 'admin': [
+  {'label': 'Overview', 'items': [
+    {'t': 'Dashboard', 'e': 'admin.dashboard', 'i': 'home', 'm': ['admin.dashboard']},
+    {'t': 'Analytics', 'e': 'admin.analytics', 'i': 'bar-chart', 'm': ['admin.analytics']}]},
+  {'label': 'Manage', 'items': [
+    {'t': 'Students', 'e': 'admin.manage_students', 'i': 'users', 'm': ['admin.manage_students', 'admin.student_new', 'admin.student_edit']},
+    {'t': 'Companies', 'e': 'admin.manage_companies', 'i': 'building', 'm': ['admin.manage_companies', 'admin.company_new', 'admin.company_edit']}]},
+  {'label': 'Machine learning', 'items': [
+    {'t': 'Datasets', 'e': 'admin.upload_dataset', 'i': 'database', 'm': ['admin.upload_dataset']},
+    {'t': 'Model training', 'e': 'admin.model_training', 'i': 'cpu', 'm': ['admin.model_training']}]},
+  {'label': 'Output', 'items': [
+    {'t': 'Reports', 'e': 'admin.reports', 'i': 'download', 'm': ['admin.reports']}]}],
+ 'tpo': [
+  {'label': 'Overview', 'items': [
+    {'t': 'Dashboard', 'e': 'tpo.dashboard', 'i': 'home', 'm': ['tpo.dashboard']},
+    {'t': 'Statistics', 'e': 'tpo.placement_statistics', 'i': 'bar-chart', 'm': ['tpo.placement_statistics']}]},
+  {'label': 'Placement cell', 'items': [
+    {'t': 'Eligible students', 'e': 'tpo.eligible_students', 'i': 'users', 'm': ['tpo.eligible_students']},
+    {'t': 'Company drives', 'e': 'tpo.company_drives', 'i': 'briefcase', 'm': ['tpo.company_drives', 'tpo.drive_new', 'tpo.drive_edit', 'tpo.drive_applicants']}]},
+  {'label': 'Output', 'items': [
+    {'t': 'Reports', 'e': 'tpo.reports', 'i': 'download', 'm': ['tpo.reports']}]}]
+} %}
+{% for group in NAV.get(current_user.role, []) %}
+<div class="nav-group">
+  <div class="nav-group__label">{{ group.label }}</div>
+  {% for item in group['items'] %}
+  <a class="nav-item {{ 'is-active' if request.endpoint in item.m }}" href="{{ url_for(item.e) }}" {% if request.endpoint in item.m %}aria-current="page"{% endif %}>
+    {{ icon(item.i) }}<span>{{ item.t }}</span>
+  </a>
+  {% endfor %}
+</div>
+{% endfor %}

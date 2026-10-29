@@ -1,348 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Placement Readiness Score</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/prediction.css') }}">
-
-</head>
-
-
-<body>
-
-<div class="prediction-container">
-
-    <div class="prediction-card">
-
-        <!-- =================================================
-             HEADER
-        ================================================== -->
-
-        <div class="prediction-header">
-
-            <h1>Placement Readiness Score</h1>
-
-            <p>
-                Evaluate your overall preparation for campus placement.
-            </p>
-
-        </div>
-
-
-        <!-- =================================================
-             FLASH MESSAGES
-        ================================================== -->
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-
-            {% if messages %}
-
-                {% for category, message in messages %}
-
-                    <div class="alert {{ category }}">
-                        {{ message }}
-                    </div>
-
-                {% endfor %}
-
-            {% endif %}
-
-        {% endwith %}
-
-
-        {% if not result %}
-
-        <!-- =================================================
-             READINESS FORM
-        ================================================== -->
-
-        <form method="POST"
-              action="{{ url_for('readiness.readiness_score') }}">
-
-
-            <div class="form-group">
-
-                <label for="cgpa">
-                    CGPA
-                </label>
-
-                <input
-                    type="number"
-                    id="cgpa"
-                    name="cgpa"
-                    min="0"
-                    max="10"
-                    step="0.01"
-                    placeholder="Enter CGPA (0 - 10)"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="attendance">
-                    Attendance (%)
-                </label>
-
-                <input
-                    type="number"
-                    id="attendance"
-                    name="attendance"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    placeholder="Enter attendance"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="aptitude_score">
-                    Aptitude Score
-                </label>
-
-                <input
-                    type="number"
-                    id="aptitude_score"
-                    name="aptitude_score"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    placeholder="Enter aptitude score"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="coding_score">
-                    Coding Score
-                </label>
-
-                <input
-                    type="number"
-                    id="coding_score"
-                    name="coding_score"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    placeholder="Enter coding score"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="communication_score">
-                    Communication Score
-                </label>
-
-                <input
-                    type="number"
-                    id="communication_score"
-                    name="communication_score"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    placeholder="Enter communication score"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="technical_score">
-                    Technical Score
-                </label>
-
-                <input
-                    type="number"
-                    id="technical_score"
-                    name="technical_score"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    placeholder="Enter technical score"
-                    required
-                >
-
-            </div>
-
-
-            <button
-                type="submit"
-                class="prediction-button">
-
-                Calculate Readiness Score
-
-            </button>
-
-        </form>
-
-
-        {% else %}
-
-        <!-- =================================================
-             READINESS RESULT
-        ================================================== -->
-
-        <div class="result-box">
-
-            <div class="result-status placed">
-
-                {{ result.readiness_level }}
-
-            </div>
-
-
-            <div class="probability-section">
-
-                <h2>
-                    {{ result.readiness_score }}/100
-                </h2>
-
-                <p>
-                    Overall Placement Readiness
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             SCORE BREAKDOWN
-        ================================================== -->
-
-        <div class="input-summary">
-
-            <h2>Readiness Breakdown</h2>
-
-            <div class="summary-grid">
-
-                <div class="summary-item">
-
-                    <span>CGPA</span>
-
-                    <strong>
-                        {{ result.breakdown.cgpa }}
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-item">
-
-                    <span>Attendance</span>
-
-                    <strong>
-                        {{ result.breakdown.attendance }}%
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-item">
-
-                    <span>Aptitude</span>
-
-                    <strong>
-                        {{ result.breakdown.aptitude }}
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-item">
-
-                    <span>Coding</span>
-
-                    <strong>
-                        {{ result.breakdown.coding }}
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-item">
-
-                    <span>Communication</span>
-
-                    <strong>
-                        {{ result.breakdown.communication }}
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-item">
-
-                    <span>Technical</span>
-
-                    <strong>
-                        {{ result.breakdown.technical }}
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             ACTIONS
-        ================================================== -->
-
-        <div class="result-actions">
-
-            <a
-                href="{{ url_for('readiness.readiness_score') }}"
-                class="prediction-button">
-
-                Calculate Again
-
-            </a>
-
-
-            <a
-                href="{{ url_for('dashboard.dashboard') }}"
-                class="dashboard-button">
-
-                Back to Dashboard
-
-            </a>
-
-        </div>
-
-        {% endif %}
-
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, csrf, number, slider, dial, meter, badge, empty %}
+{% block title %}Readiness score{% endblock %}
+{% block content %}
+{% call page_head('Readiness score', 'A single score out of 100 from CGPA, attendance and four skill areas.') %}
+  <a class="btn btn--secondary" href="{{ url_for('readiness.readiness_history') }}">{{ icon('history') }} History</a>
+{% endcall %}
+<div class="grid grid--main">
+  <section class="card">
+    {% if result %}
+    <div class="readiness-result">
+      {{ dial(result.readiness_score, 'Readiness', 'dial--lg') }}
+      <div>
+        {{ badge(result.readiness_level) }}
+        <h2 class="mt-2" style="font-size:var(--text-xl)">{{ result.readiness_level }}</h2>
+        <p class="muted mt-2">{% if saved %}Saved to your history.{% else %}Calculated from your profile. Change values on the right and calculate to save a new snapshot.{% endif %}</p>
+      </div>
     </div>
-
+    <div class="card__body" style="border-top:1px solid var(--line)">
+      <h3 class="mb-4" style="font-size:var(--text-md)">Score breakdown</h3>
+      {% for key, label in [('cgpa','CGPA'),('attendance','Attendance'),('aptitude','Aptitude'),('coding','Coding'),('communication','Communication'),('technical','Technical')] %}
+      <div class="meter-row"><span>{{ label }}</span>{{ meter(result.breakdown[key], 'good' if result.breakdown[key] >= 75 else ('warn' if result.breakdown[key] >= 60 else 'bad')) }}<span class="meter-row__val num">{{ result.breakdown[key]|num }}</span></div>
+      {% endfor %}
+      <p class="hint mt-4">Weights: CGPA 20%, attendance 15%, aptitude 15%, coding 20%, communication 15%, technical 15%.</p>
+    </div>
+    {% else %}
+    <div class="card__body">{{ empty('activity', 'No score yet', 'Enter your values to calculate your readiness.') }}</div>
+    {% endif %}
+  </section>
+  <form class="card" method="post" data-loading novalidate>
+    {{ csrf() }}
+    <div class="card__head"><div class="card__title">Calculate a new score</div></div>
+    <div class="form-section stack">
+      {{ number('cgpa', 'CGPA', values.get('cgpa'), 0, 10, 0.01) }}
+      {{ number('attendance', 'Attendance %', values.get('attendance'), 0, 100, 0.1) }}
+      {{ slider('aptitude_score', 'Aptitude', values.get('aptitude_score')) }}
+      {{ slider('coding_score', 'Coding', values.get('coding_score')) }}
+      {{ slider('communication_score', 'Communication', values.get('communication_score')) }}
+      {{ slider('technical_score', 'Technical', values.get('technical_score')) }}
+    </div>
+    <div class="form-actions"><button class="btn btn--primary" type="submit">{{ icon('activity') }} Calculate and save</button></div>
+  </form>
 </div>
-
-</body>
-
-</html>
+{% endblock %}

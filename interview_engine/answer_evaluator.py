@@ -12,6 +12,7 @@ def evaluate_answer(answer, keywords):
 
     if not answer or not answer.strip():
         return {
+            "word_count": 0,
             "score": 0,
             "matched_keywords": [],
             "missing_keywords": keywords,
@@ -51,7 +52,12 @@ def evaluate_answer(answer, keywords):
     else:
         status = "Needs Improvement"
 
+    words = len(answer_text.split())
+    if words < 12:  # one-liners cannot earn a full score
+        score = min(score, 60.0)
+        status = "Needs Improvement" if score < 40 else "Average"
     return {
+        "word_count": words,
         "score": score,
         "matched_keywords": matched_keywords,
         "missing_keywords": missing_keywords,

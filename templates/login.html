@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Login | Placement AI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="auth-container">
+
+    <div class="auth-card">
+
+        <div class="auth-header">
+            <div class="auth-logo">SP</div>
+
+            <h2>Welcome Back</h2>
+
+            <p>
+                Login to your Placement AI account
+            </p>
+        </div>
+
+
+        <form id="loginForm">
+
+            <!-- Email -->
+            <div class="form-group">
+
+                <label for="email">
+                    Email Address
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Password -->
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Error / Success Message -->
+            <div
+                id="loginMessage"
+                class="auth-message"
+                style="display: none;"
+            ></div>
+
+
+            <!-- Login Button -->
+            <button
+                type="submit"
+                class="auth-btn"
+                id="loginButton"
+            >
+                Login
+            </button>
+
+        </form>
+
+
+        <div class="auth-footer">
+
+            <p>
+                Don't have an account?
+                <a href="/register">
+                    Create Account
+                </a>
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+
+{% endblock %}

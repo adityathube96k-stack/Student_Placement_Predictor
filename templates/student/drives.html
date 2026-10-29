@@ -1,0 +1,51 @@
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, csrf, badge, empty %}
+{% block title %}Placement drives{% endblock %}
+{% block content %}
+{{ page_head('Placement drives', 'Open recruitment drives posted by your placement cell. Apply to the ones you qualify for.') }}
+{% if not scores_ok %}<div class="alert alert--warning mb-6">{{ icon('alert') }}<div><strong>Complete your profile to apply.</strong> Eligibility needs your CGPA, attendance and skill scores. <a href="{{ url_for('dashboard.profile') }}">Open profile</a></div></div>{% endif %}
+<div class="tabs mb-6" data-tabs role="tablist">
+  <a class="tab is-active" href="#" data-tab="open" role="tab">Open drives ({{ cards|length }})</a>
+  <a class="tab" href="#" data-tab="mine" role="tab">My applications ({{ history|length }})</a>
+</div>
+<div>
+<div data-panel="open">
+  {% if cards %}
+  <div class="grid grid--2">
+    {% for c in cards %}{% set d = c.drive %}
+    <article class="card drive-card">
+      <div class="card__body stack">
+        <div class="row between" style="align-items:flex-start">
+          <div class="row"><span class="list-icon">{{ icon('building') }}</span><div><h3 style="font-size:var(--text-md)">{{ d.company_name }}</h3><div class="text-sm muted">{{ d.job_role }}</div></div></div>
+          {{ badge(d.status) }}
+        </div>
+        <dl class="drive-meta">
+          <div>{{ icon('calendar', 'icon--sm') }}<span>{{ d.drive_date|fmt_date('%a, %d %b %Y') }}</span></div>
+          <div>{{ icon('map', 'icon--sm') }}<span>{{ d.location or 'To be announced' }}</span></div>
+          <div>{{ icon('users', 'icon--sm') }}<span>{{ d.openings }} openings</span></div>
+          <div>{{ icon('trending-up', 'icon--sm') }}<span>{{ d.package_lpa|num }} LPA</span></div>
+        </dl>
+        {% if d.description %}<p class="text-sm muted">{{ d.description }}</p>{% endif %}
+        {% if c.verdict and not c.verdict.eligible %}
+        <div class="needs">{% for m in c.verdict.missing_requirements[:2] %}<div class="needs__row">{{ icon('x-circle', 'icon--sm') }}<span>{{ m.requirement }}: need {{ m.required_score|num }}, you have {{ m.student_score|num }}</span></div>{% endfor %}
+          {% if c.verdict.missing_skills %}<div class="needs__row">{{ icon('x-circle', 'icon--sm') }}<span>Missing skills: {{ c.verdict.missing_skills|join(', ') }}</span></div>{% endif %}</div>
+        {% endif %}
+      </div>
+      <div class="card__foot row between">
+        {% if c.status %}<span class="row">Your application: {{ badge(c.status) }}</span>
+        {% elif c.verdict and c.verdict.eligible %}<span class="text-sm good row">{{ icon('check-circle', 'icon--sm') }} You are eligible</span>
+          <form method="post" action="{{ url_for('company.apply_drive', drive_id=d.id) }}">{{ csrf() }}<button class="btn btn--primary btn--sm" type="submit">Apply now</button></form>
+        {% else %}<span class="text-sm muted">Not eligible yet</span><button class="btn btn--secondary btn--sm" disabled>Apply</button>{% endif %}
+      </div>
+    </article>{% endfor %}
+  </div>
+  {% else %}<section class="card">{{ empty('briefcase', 'No open drives right now', 'You will be notified as soon as the placement cell posts one.') }}</section>{% endif %}
+</div>
+<div data-panel="mine" hidden>
+  {% if history %}
+  <section class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Company</th><th>Role</th><th>Drive date</th><th>Applied</th><th>Status</th></tr></thead>
+    <tbody>{% for a in history %}<tr><td><strong>{{ a.company_name }}</strong></td><td>{{ a.job_role }}</td><td class="nowrap">{{ a.drive_date|fmt_date('%d %b %Y') }}</td><td class="nowrap">{{ a.applied_at|fmt_date('%d %b %Y') }}</td><td>{{ badge(a.application_status) }}</td></tr>{% endfor %}</tbody></table></div></section>
+  {% else %}<section class="card">{{ empty('file', 'No applications yet', 'Apply to an open drive and track every stage here.') }}</section>{% endif %}
+</div>
+</div>
+{% endblock %}

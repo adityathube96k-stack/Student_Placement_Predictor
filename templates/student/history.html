@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction History | Placement AI{% endblock %}
+
+{% block page_title %}
+Prediction History
+{% endblock %}
+
+{% block page_subtitle %}
+Track your previous AI placement predictions and progress.
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="prediction-page">
+
+    <!-- Introduction -->
+    <div class="welcome-card">
+
+        <div>
+            <h2>
+                Your Prediction History 🕒
+            </h2>
+
+            <p>
+                Review your previous placement predictions,
+                employability scores, and AI model results.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- History -->
+    <div class="dashboard-card">
+
+        <div class="card-header">
+
+            <div>
+                <h3>
+                    Previous Predictions
+                </h3>
+
+                <p>
+                    Your latest AI-generated placement assessments.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div id="historyContainer">
+
+            <div class="empty-state">
+                Loading prediction history...
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Summary -->
+    <div class="dashboard-card">
+
+        <div class="card-header">
+
+            <div>
+                <h3>
+                    Prediction Summary 📊
+                </h3>
+
+                <p>
+                    Overview of your prediction results.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="prediction-result-grid">
+
+            <div class="result-box">
+
+                <span>
+                    Predictions
+                </span>
+
+                <strong id="totalPredictions">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <span>
+                    Best Placement
+                </span>
+
+                <strong id="bestPlacement">
+                    0%
+                </strong>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <span>
+                    Best Employability
+                </span>
+
+                <strong id="bestEmployability">
+                    0%
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "layouts/public.html" %}
+{% from "partials/_macros.html" import icon %}
+{% block title %}About · {{ app_name }}{% endblock %}
+{% block content %}
+<section class="section section--first">
+  <div class="section__inner prose-wrap">
+    <h1 class="serif page-title">How placement predictions work</h1>
+    <p class="lead">Student Placement Predictor helps students and placement cells make better decisions with data they already have. This page explains what the system does and where its limits are.</p>
+
+    <div class="grid grid--3 mt-6">
+      <div class="card card__body"><span class="list-icon">{{ icon('database') }}</span><h3 class="mt-4">1. Learn from outcomes</h3><p class="muted mt-2">A model is trained on past student records: CGPA, attendance, four skill scores and experience, together with whether each student was placed.</p></div>
+      <div class="card card__body"><span class="list-icon list-icon--gold">{{ icon('cpu') }}</span><h3 class="mt-4">2. Compare candidates fairly</h3><p class="muted mt-2">Logistic regression, random forest and gradient boosting are compared with cross-validation. The simplest model within half a point of the best is kept.</p></div>
+      <div class="card card__body"><span class="list-icon list-icon--success">{{ icon('target') }}</span><h3 class="mt-4">3. Explain the result</h3><p class="muted mt-2">Each prediction shows how much every input moved the probability compared with a typical student, so the advice is specific.</p></div>
+    </div>
+
+    <h2 class="mt-6 serif">What it can and cannot tell you</h2>
+    <ul class="checks mt-4">
+      <li>{{ icon('check-circle') }}<span>A probability is an estimate from historical patterns. It is not a guarantee for any student or company.</span></li>
+      <li>{{ icon('check-circle') }}<span>The bundled dataset is synthetic demo data. Accuracy on your campus depends on retraining with your own placement records.</span></li>
+      <li>{{ icon('check-circle') }}<span>Company criteria are set by your placement cell and can be changed at any time.</span></li>
+      <li>{{ icon('check-circle') }}<span>Resumes are stored privately and are only visible to the student who uploaded them.</span></li>
+    </ul>
+
+    <h2 class="mt-6 serif">Built with</h2>
+    <div class="tag-list mt-4"><span class="chip">Python</span><span class="chip">Flask</span><span class="chip">scikit-learn</span><span class="chip">MySQL or SQLite</span><span class="chip">ReportLab</span><span class="chip">openpyxl</span><span class="chip">Vanilla JavaScript</span></div>
+    <div class="row mt-6"><a class="btn btn--primary" href="{{ url_for('auth.register') }}">Create free account</a><a class="btn btn--secondary" href="{{ url_for('main.contact') }}">Contact us</a></div>
+  </div>
+</section>
+{% endblock %}

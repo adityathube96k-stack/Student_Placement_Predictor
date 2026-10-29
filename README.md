@@ -1,509 +1,119 @@
-# 🎓 Student_Placement_Predictor
+# Student Placement Predictor
 
-## 📌 Overview
+A complete campus-placement platform. Students get a **placement probability**, **readiness score**, **skill-gap plan**, **company eligibility**, **resume score** and **mock interviews**. Placement officers run **drives and applicant pipelines**. Administrators manage **students, companies, datasets and the machine-learning model**.
 
-**Student_Placement_Predictor** is an industry-level AI and Machine Learning based web application designed to predict student placement opportunities and improve career readiness.
+![Student dashboard](docs/screenshots/03_student_dashboard.jpg)
 
-The system analyzes academic performance, technical skills, communication abilities, aptitude scores, internships, projects, certifications, and other employability factors to predict placement outcomes and generate personalized recommendations.
+## Quick start
 
-The platform helps students, Training & Placement Officers (TPOs), and educational institutions monitor placement readiness through advanced analytics and intelligent recommendations.
-
----
-
-# 🚀 Features
-
-## 👨‍🎓 Student Features
-
-### Authentication System
-
-* Student Registration
-* Secure Login
-* Forgot Password
-* Profile Management
-* Role-Based Access
-
-### Placement Prediction
-
-* Placement Prediction (Placed / Not Placed)
-* Placement Probability Score
-* Prediction History
-* Performance Tracking
-
-### Placement Readiness Score
-
-* Readiness Score (0–100)
-* Employability Assessment
-* Progress Monitoring
-
-### Resume Analyzer
-
-* Resume Upload (PDF)
-* Resume Parsing
-* Resume Scoring
-* Resume Improvement Suggestions
-
-### Skill Gap Analysis
-
-* Identify Missing Skills
-* Industry Skill Comparison
-* Personalized Recommendations
-
-### Career Roadmap Generator
-
-* Monthly Learning Plan
-* Career Growth Roadmap
-* Personalized Development Path
-
-### Company Eligibility Checker
-
-* Company-wise Eligibility Check
-* CGPA Validation
-* Skills Matching
-* Backlog Verification
-
-### AI Interview Preparation
-
-* Technical Questions
-* HR Questions
-* Aptitude Questions
-* Mock Interviews
-* Interview Evaluation
-
-### Learning Recommendations
-
-* Recommended Courses
-* Certification Suggestions
-* Learning Resources
-
-### Reports
-
-* Placement Report
-* Resume Report
-* Skill Gap Report
-* Download PDF Reports
-
----
-
-## 👨‍💼 Admin Features
-
-### Student Management
-
-* Add Student
-* Update Student
-* Delete Student
-* Manage Records
-
-### Company Management
-
-* Add Company
-* Edit Eligibility Criteria
-* Manage Recruitment Rules
-
-### Analytics Dashboard
-
-* Placement Statistics
-* Department Analysis
-* Student Performance Analysis
-
-### Machine Learning Management
-
-* Dataset Upload
-* Model Retraining
-* Model Evaluation
-
----
-
-## 🏢 TPO Features
-
-### Placement Monitoring
-
-* Eligible Students List
-* Placement Statistics
-* Company-wise Reports
-* Department-wise Reports
-
----
-
-# 🏗 System Architecture
-
-```text
-Frontend (HTML/CSS/JavaScript)
-            │
-            ▼
-       Flask Backend
-            │
- ┌──────────┴──────────┐
- ▼                     ▼
-MySQL Database   Machine Learning Engine
-                         │
-                         ▼
-                 Prediction Model
-                         │
-                         ▼
-             Recommendation Engine
-```
-
----
-
-# 🧠 Machine Learning Workflow
-
-```text
-Dataset
-   │
-   ▼
-Data Cleaning
-   │
-   ▼
-Feature Engineering
-   │
-   ▼
-Train/Test Split
-   │
-   ▼
-Random Forest / XGBoost
-   │
-   ▼
-Model Evaluation
-   │
-   ▼
-Model Deployment
-   │
-   ▼
-Real-Time Prediction
-```
-
----
-
-# 🛠 Technology Stack
-
-## Frontend
-
-* HTML5
-* CSS3
-* JavaScript
-* Bootstrap 5
-* Chart.js
-
-## Backend
-
-* Python
-* Flask
-
-## Database
-
-* MySQL
-
-## Machine Learning
-
-* Scikit-Learn
-* Pandas
-* NumPy
-* Joblib
-
-## Resume Processing
-
-* PyPDF2
-* pdfplumber
-* NLTK
-* spaCy
-
-## Reporting
-
-* ReportLab
-* OpenPyXL
-
-## Notifications
-
-* Flask-Mail
-
-## Deployment
-
-* GitHub
-* Render
-* AWS
-* Docker
-
----
-
-# 📂 Project Structure
-
-```text
-Student_Placement_Predictor/
-│
-├── app.py
-├── config.py
-├── requirements.txt
-├── .env
-├── README.md
-│
-├── static/
-│   ├── css/
-│   ├── js/
-│   ├── images/
-│   └── uploads/
-│
-├── templates/
-│   ├── auth/
-│   ├── student/
-│   ├── admin/
-│   └── tpo/
-│
-├── routes/
-├── models/
-├── database/
-├── dataset/
-├── ml/
-├── resume_analyzer/
-├── recommendation_engine/
-├── interview_engine/
-├── company_eligibility/
-├── analytics/
-├── reports/
-├── notifications/
-├── utils/
-├── tests/
-└── docs/
-```
-
----
-
-# 🗄 Database Tables
-
-### users
-
-* id
-* name
-* email
-* password
-* role
-
-### students
-
-* id
-* user_id
-* cgpa
-* attendance
-* aptitude
-* coding
-* communication
-* technical
-* projects
-* internships
-* certifications
-
-### predictions
-
-* id
-* user_id
-* prediction
-* probability
-* readiness_score
-
-### companies
-
-* id
-* company_name
-* min_cgpa
-* required_skills
-
-### resume_analysis
-
-* id
-* user_id
-* resume_score
-
-### interviews
-
-* id
-* user_id
-* interview_score
-
-### notifications
-
-* id
-* user_id
-* message
-* status
-
----
-
-# ⚙ Installation
-
-## Clone Repository
-
-```bash
-git clone https://github.com/your-username/Student_Placement_Predictor.git
-cd Student_Placement_Predictor
-```
-
----
-
-## Create Virtual Environment
-
-### Windows
+Requires Python 3.10 or newer. No database server is needed to try it.
 
 ```bash
 python -m venv venv
-venv\Scripts\activate
-```
-
-### Linux / macOS
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
----
-
-## Install Dependencies
-
-```bash
+source venv/bin/activate          # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+python run.py                     # http://127.0.0.1:5000
 ```
 
----
+On first run the app creates a SQLite database, loads demo data and prints the demo sign-ins. Open the login page and click a role chip to fill the form.
 
-## Configure Database
 
-Create MySQL Database:
+| Role | Email | Password |
+|---|---|---|
+| Student | `sdhangar811@gmail.com` | Not displayed |
+| Placement Officer | `ganeshmarathe8232@gmail.com` | Not displayed |
+| Admin | `adityathube96k@gmail.com` | Not displayed |
 
-```sql
-CREATE DATABASE placement_predictor;
+
+> These accounts exist only when demo data is enabled (the default outside production). Never run production with them.
+
+## Features
+
+**Student**
+- Dashboard with readiness dial, next steps, trend and skill radar
+- Placement prediction with a **live what-if estimate** and per-factor explanation
+- Readiness score, skill-gap analysis, course and certification recommendations, six-month roadmap
+- Resume analyzer (section checks, detected skills, fixes); one click adds detected skills to the profile
+- Company eligibility against every active company, with exactly what is missing
+- Placement drives: apply to open drives and track each stage
+- Timed mock interviews (Technical, Programming, Aptitude, HR, Behavioral) with review of every answer
+- Personal analytics, PDF placement report, Excel history export, notifications
+
+**Placement officer (TPO)**
+- Outcome dashboard and branch-wise statistics
+- Eligible and near-eligible students for any company
+- Create drives (eligible students are notified automatically) and move applicants through *Applied, Shortlisted, Selected, Rejected*; selection records the placement
+- Excel and CSV exports
+
+**Administrator**
+- Student management (add, edit, deactivate, delete) with search, filter, sort and pagination
+- Company and eligibility-criteria management
+- Dataset upload with validation, and **model retraining** that compares three algorithms, shows hold-out metrics, confusion matrix and feature importance, and keeps a version history
+- Institute analytics and exports
+
+## Switching to MySQL
+
+Set these in `.env` (copy `.env.example`); tables are created for you:
+
+```ini
+DB_ENGINE=mysql
+MYSQL_HOST=localhost
+MYSQL_USER=root
+MYSQL_PASSWORD=your_password
+MYSQL_DATABASE=placement_predictor
 ```
 
-Update database credentials inside:
+Already have a database from an earlier version of this project? Run `python manage.py init-db`. It adds any missing columns and tables without touching your data. Back up first as usual.
 
-```python
-config.py
-```
+Or run everything with Docker: `docker compose up --build` starts the app on port 5000 with MySQL.
 
----
-
-## Train Machine Learning Model
+## Commands
 
 ```bash
-python ml/train_model.py
+python manage.py init-db          # create/upgrade tables
+python manage.py create-user --role admin
+python manage.py train            # retrain the model
+python manage.py routes           # list every URL
+python manage.py test             # 46 automated tests
 ```
 
----
+## Project layout
 
-## Run Application
-
-```bash
-python app.py
+```
+app.py / run.py       application factory and entry point
+routes/               feature blueprints            models/        data access
+ml/                   training, registry, prediction analytics/    dashboard queries
+database/             dual-engine layer, schema, seed
+templates/ static/    server-rendered UI, design system, SVG charts (no CDN, no build step)
+tests/                unit, page and workflow tests docs/         architecture, database, design system, routes
 ```
 
-Open Browser:
+More detail: [Architecture](docs/ARCHITECTURE.md) · [Database](docs/DATABASE.md) · [Design system](docs/DESIGN_SYSTEM.md) · [Routes](docs/ROUTES.md)
 
-```text
-http://127.0.0.1:5000
-```
+## About the model and the data
 
----
+The bundled `dataset/placement_dataset.csv` is **synthetic demo data** (about 1,200 rows, generated by `scripts/generate_dataset.py`; the original 93 sample rows are kept in `placement_dataset_original.csv`). Reported accuracy therefore describes the demo, not your campus. Upload your institute's real placement records in **Admin, Datasets**, then retrain.
 
-# 📊 Prediction Inputs
+Predictions are statistical estimates from past outcomes. They are meant to guide preparation, not to decide anyone's prospects.
 
-The model uses the following parameters:
+## Production checklist
 
-* CGPA
-* Attendance Percentage
-* Aptitude Score
-* Coding Skill Score
-* Communication Skill Score
-* Technical Skill Score
-* Projects Completed
-* Internship Experience
-* Certifications
+- `APP_ENV=production` and a long random `SECRET_KEY`
+- `SESSION_COOKIE_SECURE=1` behind HTTPS
+- `SEED_DEMO_DATA=0` (default in production); set `ADMIN_EMAIL` and `ADMIN_PASSWORD` to create the first admin
+- Configure `MAIL_*` so password reset emails are delivered; without it, mail is written to `logs/outbox.log`
+- Use MySQL, and persist `instance/` (resumes), `dataset/uploads/` and `ml/models/`
+- Serve with `gunicorn --preload run:app` behind a reverse proxy
 
----
+## Screenshots
 
-# 🎯 Prediction Outputs
+| | |
+|---|---|
+| ![Landing](docs/screenshots/01_landing.jpg) | ![Login](docs/screenshots/02_login.jpg) |
+| ![Prediction](docs/screenshots/04_prediction.jpg) | ![Eligibility](docs/screenshots/05_eligibility.jpg) |
+| ![Admin](docs/screenshots/06_admin_dashboard.jpg) | ![Model training](docs/screenshots/07_model_training.jpg) |
+| ![TPO](docs/screenshots/08_tpo_dashboard.jpg) | ![Dark mode](docs/screenshots/09_dark_dashboard.jpg) |
 
-### Placement Prediction
+## License
 
-* Placed
-* Not Placed
-
-### Placement Probability
-
-Example:
-
-```text
-89%
-```
-
-### Placement Readiness Score
-
-Example:
-
-```text
-84/100
-```
-
-### Recommendations
-
-* Improve Coding Skills
-* Complete More Projects
-* Improve Communication Skills
-* Obtain Industry Certifications
-* Practice Aptitude Questions
-
----
-
-# 🔒 Security Features
-
-* Password Hashing
-* Session Management
-* Role-Based Access Control
-* Input Validation
-* SQL Injection Prevention
-* Secure Authentication
-* Protected Admin Routes
-
----
-
-# 📈 Future Enhancements
-
-* AI Career Assistant Chatbot
-* LinkedIn Profile Analysis
-* ATS Resume Scoring
-* Real-Time Job Recommendations
-* Voice-Based Mock Interviews
-* AI Career Guidance System
-* Multi-College Placement Analytics
-* Mobile Application
-
----
-
-# 📊 Expected Benefits
-
-### Students
-
-* Understand placement readiness
-* Improve weak skills
-* Receive personalized recommendations
-* Prepare effectively for interviews
-
-### Colleges
-
-* Monitor student placement performance
-* Improve placement statistics
-* Generate analytical reports
-
-### TPO
-
-* Track eligible students
-* Manage company requirements
-* Analyze placement trends
-
----
-
-
----
-
-# 📄 License
-
-This project is developed for academic, educational, and research purposes.
-
-© 2026 Student_Placement_Predictor. All Rights Reserved.
+Add the licence of your choice. Lora font: SIL Open Font License 1.1 (see `static/fonts/README.txt`).

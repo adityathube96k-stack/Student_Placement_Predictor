@@ -1,251 +1,57 @@
-# ==========================================================
-# STUDENT PLACEMENT PREDICTOR
-# ML DATA PREPROCESSING
-# ==========================================================
-
+"""Dataset loading and train/test preparation."""
 import os
+
 import pandas as pd
-
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-import joblib
+
+from config import Config
+from ml.feature_engineering import TARGET_COLUMN, clean_dataframe, select_features
+
+BASE_DATASET = os.path.join(Config.DATASET_DIR, "placement_dataset.csv")
+FEATURE_COLUMNS = None  # determined per dataset; see select_features()
+TEST_SIZE = 0.20
+RANDOM_STATE = 42
 
 
-# ==========================================================
-# PATH CONFIGURATION
-# ==========================================================
-
-BASE_DIR = os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
-)
-
-DATASET_PATH = os.path.join(
-    BASE_DIR,
-    "dataset",
-    "placement_dataset.csv"
-)
-
-MODEL_DIR = os.path.join(
-    BASE_DIR,
-    "ml",
-    "models"
-)
-
-SCALER_PATH = os.path.join(
-    MODEL_DIR,
-    "scaler.pkl"
-)
-
-
-# ==========================================================
-# FEATURES
-# ==========================================================
-
-FEATURE_COLUMNS = [
-    "cgpa",
-    "attendance",
-    "aptitude_score",
-    "coding_score",
-    "communication_score",
-    "technical_score"
-]
-
-TARGET_COLUMN = "placed"
-
-
-# ==========================================================
-# LOAD DATASET
-# ==========================================================
-
-def load_dataset():
-
-    if not os.path.exists(DATASET_PATH):
-
-        raise FileNotFoundError(
-            f"Dataset not found: {DATASET_PATH}"
-        )
-
-    data = pd.read_csv(
-        DATASET_PATH
-    )
-
+def load_datasets(paths=None):
+    """Load and merge one or more CSV files. Missing optional columns become NaN
+    (median-imputed inside the model pipeline)."""
+    paths = paths or [BASE_DATASET]
+    frames = []
+    for path in paths:
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"Dataset not found: {path}")
+        frames.append(pd.read_csv(path))
+    merged = pd.concat(frames, ignore_index=True, sort=False)
+    data = clean_dataframe(merged)
+    if data.empty:
+        raise ValueError("Dataset has no valid rows.")
+    if data[TARGET_COLUMN].nunique() < 2:
+        raise ValueError("Dataset must contain both placed (1) and not placed (0) rows.")
+    if len(data) < 30:
+        raise ValueError("Dataset needs at least 30 valid rows to train a model.")
     return data
 
 
-# ==========================================================
-# VALIDATE DATASET
-# ==========================================================
-
-def validate_dataset(data):
-
-    required_columns = (
-        FEATURE_COLUMNS
-        + [TARGET_COLUMN]
-    )
-
-    missing_columns = [
-        column
-        for column in required_columns
-        if column not in data.columns
-    ]
-
-    if missing_columns:
-
-        raise ValueError(
-            "Missing columns: "
-            + ", ".join(missing_columns)
-        )
-
-    if data.empty:
-
-        raise ValueError(
-            "Placement dataset is empty."
-        )
-
-    return True
-
-
-# ==========================================================
-# PREPARE DATA
-# ==========================================================
-
-def prepare_data():
-
-    # Load dataset
-    data = load_dataset()
-
-    # Validate dataset
-    validate_dataset(data)
-
-    # Select features
-    X = data[
-        FEATURE_COLUMNS
-    ].copy()
-
-    # Select target
-    y = data[
-        TARGET_COLUMN
-    ].copy()
-
-    # Convert values to numeric
-    X = X.apply(
-        pd.to_numeric,
-        errors="coerce"
-    )
-
-    y = pd.to_numeric(
-        y,
-        errors="coerce"
-    )
-
-    # Remove invalid rows
-    valid_rows = (
-        X.notna().all(axis=1)
-        & y.notna()
-    )
-
-    X = X.loc[
-        valid_rows
-    ]
-
-    y = y.loc[
-        valid_rows
-    ]
-
-    # Train-test split
+def prepare_data(paths=None):
+    data = load_datasets(paths)
+    features = select_features(data)
+    X, y = data[features], data[TARGET_COLUMN]
     X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=0.20,
-        random_state=42,
-        stratify=y
-    )
-
-    # Create scaler
-    scaler = StandardScaler()
-
-    # Fit only on training data
-    X_train_scaled = scaler.fit_transform(
-        X_train
-    )
-
-    # Transform test data
-    X_test_scaled = scaler.transform(
-        X_test
-    )
-
-    # Create model directory
-    os.makedirs(
-        MODEL_DIR,
-        exist_ok=True
-    )
-
-    # Save scaler
-    joblib.dump(
-        scaler,
-        SCALER_PATH
-    )
-
-    return (
-        X_train_scaled,
-        X_test_scaled,
-        y_train,
-        y_test
-    )
+        X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=y)
+    return X_train, X_test, y_train, y_test, features, data
 
 
-# ==========================================================
-# MAIN TEST
-# ==========================================================
-
-if __name__ == "__main__":
-
-    try:
-
-        (
-            X_train,
-            X_test,
-            y_train,
-            y_test
-        ) = prepare_data()
-
-        print(
-            "=========================================="
-        )
-
-        print(
-            "ML PREPROCESSING SUCCESSFUL"
-        )
-
-        print(
-            "=========================================="
-        )
-
-        print(
-            f"Training samples: {len(X_train)}"
-        )
-
-        print(
-            f"Testing samples: {len(X_test)}"
-        )
-
-        print(
-            f"Training features: {X_train.shape[1]}"
-        )
-
-        print(
-            f"Scaler saved at: {SCALER_PATH}"
-        )
-
-        print(
-            "=========================================="
-        )
-
-    except Exception as error:
-
-        print(
-            "Preprocessing Error:",
-            error
-        )
+def validate_upload(path):
+    """Validate an uploaded CSV. Returns summary dict or raises ValueError."""
+    frame = pd.read_csv(path)
+    original_rows = len(frame)
+    data = clean_dataframe(frame)
+    if len(data) == 0:
+        raise ValueError("No valid rows found. Check numeric values and that 'placed' is 0 or 1.")
+    return {
+        "rows": int(len(data)),
+        "dropped": int(original_rows - len(data)),
+        "placed": int(data[TARGET_COLUMN].sum()),
+        "features": select_features(data),
+    }

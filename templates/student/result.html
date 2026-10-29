@@ -1,183 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Placement Prediction Result</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/prediction.css') }}">
-
-</head>
-
-
-<body>
-
-<div class="prediction-container">
-
-    <div class="prediction-card">
-
-        <!-- HEADER -->
-
-        <div class="prediction-header">
-
-            <h1>Placement Prediction Result</h1>
-
-            <p>
-                Your AI-based placement prediction has been generated.
-            </p>
-
-        </div>
-
-
-        <!-- RESULT -->
-
-        {% if result %}
-
-            <div class="result-box">
-
-                {% if result.prediction == 1 %}
-
-                    <div class="result-status placed">
-                        PLACEMENT PREDICTED
-                    </div>
-
-                {% else %}
-
-                    <div class="result-status not-placed">
-                        PLACEMENT NOT PREDICTED
-                    </div>
-
-                {% endif %}
-
-
-                <!-- Probability -->
-
-                <div class="probability-section">
-
-                    <h2>
-                        {{ result.placement_probability }}%
-                    </h2>
-
-                    <p>
-                        Placement Probability
-                    </p>
-
-                </div>
-
-
-                <!-- Other Probability -->
-
-                <div class="secondary-probability">
-
-                    <p>
-                        Not Placed Probability:
-                        <strong>
-                            {{ result.not_placed_probability }}%
-                        </strong>
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- INPUT SUMMARY -->
-
-            <div class="input-summary">
-
-                <h2>Your Input Details</h2>
-
-                <div class="summary-grid">
-
-                    <div class="summary-item">
-                        <span>CGPA</span>
-                        <strong>{{ inputs.cgpa }}</strong>
-                    </div>
-
-                    <div class="summary-item">
-                        <span>Attendance</span>
-                        <strong>{{ inputs.attendance }}%</strong>
-                    </div>
-
-                    <div class="summary-item">
-                        <span>Aptitude</span>
-                        <strong>{{ inputs.aptitude_score }}</strong>
-                    </div>
-
-                    <div class="summary-item">
-                        <span>Coding</span>
-                        <strong>{{ inputs.coding_score }}</strong>
-                    </div>
-
-                    <div class="summary-item">
-                        <span>Communication</span>
-                        <strong>{{ inputs.communication_score }}</strong>
-                    </div>
-
-                    <div class="summary-item">
-                        <span>Technical</span>
-                        <strong>{{ inputs.technical_score }}</strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ACTION BUTTONS -->
-
-            <div class="result-actions">
-
-                <a
-                    href="{{ url_for('prediction.prediction') }}"
-                    class="prediction-button">
-
-                    Predict Again
-
-                </a>
-
-
-                <a
-                    href="{{ url_for('dashboard.dashboard') }}"
-                    class="dashboard-button">
-
-                    Back to Dashboard
-
-                </a>
-
-            </div>
-
-        {% else %}
-
-            <div class="alert danger">
-
-                Unable to generate prediction result.
-
-            </div>
-
-            <div class="back-link">
-
-                <a href="{{ url_for('prediction.prediction') }}">
-                    ← Try Again
-                </a>
-
-            </div>
-
-        {% endif %}
-
+{% extends "layouts/app.html" %}
+{% from "partials/_macros.html" import icon, page_head, dial, badge, meter %}
+{% block title %}Prediction result{% endblock %}
+{% block content %}
+{% call page_head('Your prediction result', 'Saved to your history. Here is what drives the estimate.') %}
+  <a class="btn btn--secondary" href="{{ url_for('report.student_pdf') }}">{{ icon('download') }} PDF report</a>
+  <a class="btn btn--primary" href="{{ url_for('prediction.prediction') }}">{{ icon('refresh') }} Run again</a>
+{% endcall %}
+
+<section class="panel-ink result-hero">
+  <div>{{ dial(result.placement_probability, 'Probability', 'dial--lg', on_ink=True) }}</div>
+  <div class="result-hero__body">
+    <div class="row row--wrap"><span class="badge {{ 'badge--success' if result.prediction else 'badge--danger' }}">{{ result.result }}</span><span class="badge badge--gold">{{ result.band }} chance</span></div>
+    <h2>{% if result.prediction %}The model expects you to be placed.{% else %}The model sees gaps to close first.{% endif %}</h2>
+    <p class="muted">{{ result.placement_probability|num }}% placed against {{ result.not_placed_probability|num }}% not placed, using model {{ result.model_version }}. A probability is an estimate from past outcomes, not a promise.</p>
+  </div>
+</section>
+
+<div class="grid grid--main mt-6">
+  <section class="card">
+    <div class="card__head"><div><div class="card__title">What moved your probability</div><div class="card__sub">Change versus a typical student on each factor</div></div></div>
+    <div class="card__body">
+      {% set maxabs = [result.factors|map(attribute='impact')|map('abs')|max, 1]|max %}
+      <div class="diverge">
+        {% for f in result.factors %}
+        <div class="diverge__row"><span>{{ f.label }}</span>
+          <div class="diverge__bar"><i class="{{ 'pos' if f.impact >= 0 else 'neg' }}" style="--w: {{ (f.impact|abs / maxabs * 100)|round(1) }}"></i></div>
+          <b class="num {{ 'good' if f.impact > 0 else ('bad' if f.impact < 0 else 'faint') }}">{{ '+' if f.impact > 0 }}{{ f.impact }}</b></div>
+        {% endfor %}
+      </div>
+      <p class="hint mt-4">Values are percentage points. Green helps your chance; red holds it back.</p>
     </div>
-
+  </section>
+  <section class="stack">
+    <div class="card">
+      <div class="card__head"><div class="card__title">What to do next</div></div>
+      <ul class="list card__body">{% for tip in tips %}<li><span class="list-icon list-icon--gold">{{ icon('zap') }}</span><span>{{ tip }}</span></li>{% endfor %}</ul>
+    </div>
+    <div class="card">
+      <div class="card__head"><div class="card__title">Skill gap snapshot</div><a class="btn btn--ghost btn--sm" href="{{ url_for('skill_gap.skill_gap') }}">Details</a></div>
+      <div class="card__body">
+        {% for name, s in gap.skills.items() %}
+        <div class="meter-row">
+          <span>{{ name }}</span>{{ meter(s.current_score, 'good' if s.gap <= 0 else ('warn' if s.gap <= 10 else 'bad'), s.target_score) }}<span class="meter-row__val num">{{ s.current_score|num }}</span>
+        </div>{% endfor %}
+      </div>
+    </div>
+  </section>
 </div>
-
-</body>
-
-</html>
+{% endblock %}
