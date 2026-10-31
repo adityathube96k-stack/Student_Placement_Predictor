@@ -65,7 +65,7 @@ MYSQL_DATABASE=placement_predictor
 
 Already have a database from an earlier version of this project? Run `python manage.py init-db`. It adds any missing columns and tables without touching your data. Back up first as usual.
 
-Or run everything with Docker: `docker compose up --build` starts the app on port 5000 with MySQL.
+Or run everything with Docker: `docker compose up --build` starts the app on port 5000 with MySQL
 
 ## Commands
 
