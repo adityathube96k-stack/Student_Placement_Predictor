@@ -116,4 +116,4 @@ Predictions are statistical estimates from past outcomes. They are meant to guid
 
 ## License
 
-Add the licence of your choice. Lora font: SIL Open Font License 1.1 (see `static/fonts/README.txt`).
+Add the licence of your choice. Lora font: SIL Open Font License 1.1 (see `static/fonts/README.txt`)
